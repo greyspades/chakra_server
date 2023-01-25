@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Recruitment_portal.props" />
+</Project>
