@@ -10,8 +10,8 @@ namespace Candidate.Controllers;
 public class CandidateController : ControllerBase
 {
     Guid guid = Guid.NewGuid();
-    private readonly IRecruitmentRepository _repo;
-    public CandidateController(IRecruitmentRepository repo)
+    private readonly ICandidateRepository _repo;
+    public CandidateController(ICandidateRepository repo)
     {
         this._repo = repo;
     }

@@ -6,7 +6,7 @@ using Candidate.Models;
 
 namespace Recruitment.Interface
 {
-   public interface IRecruitmentRepository
+   public interface ICandidateRepository
    {
        public Task<IEnumerable<CandidateModel>> GetCandidates();
        public Task<dynamic> TestEndpoint();
@@ -14,5 +14,10 @@ namespace Recruitment.Interface
        public Task<string> CreateCandidate(CandidateModel payload);
        public Task<string> UpdateData(UpdateEmail payload);
 
+   }
+
+   public interface IRolesRepository
+   {
+    
    }
 }

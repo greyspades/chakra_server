@@ -8,10 +8,10 @@ using Dapper;
 using System.Data;
 
 namespace Recruitment.Repositories;
-    public class RecruitmentRepository : IRecruitmentRepository
+    public class CandidateRepository : ICandidateRepository
 {
     private readonly IConfiguration _config;
-    public RecruitmentRepository(IConfiguration config) {
+    public CandidateRepository(IConfiguration config) {
         this._config = config;
     }
     public async Task<IEnumerable<CandidateModel>> GetCandidates() {

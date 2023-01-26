@@ -2,6 +2,7 @@ using Recruitment.Context;
 using Recruitment.Interface;
 using Microsoft.AspNetCore;
 using Recruitment.Repositories;
+using Roles.Controller;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 builder.Services.AddSingleton<DapperContext>();
-builder.Services.AddScoped<IRecruitmentRepository, RecruitmentRepository>();
+builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
+// builder.Services.AddScoped<RoleController>();
 
 var app = builder.Build();
 
