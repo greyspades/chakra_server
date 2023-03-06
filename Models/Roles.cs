@@ -6,6 +6,7 @@ public class RoleModel
     public string? Status { get; set; }
     public string? Description { get; set; }
     public int? Experience { get; set; }
+    public string? Salary { get; set; }
     public DateTime? Deadline { get; set; }
     public string? Unit { get; set; }
 }

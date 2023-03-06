@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Candidate.Models;
+using Roles.Models;
 
 namespace Recruitment.Interface
 {
@@ -18,6 +19,9 @@ namespace Recruitment.Interface
 
    public interface IRolesRepository
    {
-    
+    public Task<IEnumerable<RoleModel>> GetRoles();
+    public Task<IEnumerable<CandidateModel>> PostRole();
+
+
    }
 }

@@ -3,6 +3,7 @@ using Recruitment.Interface;
 using Microsoft.AspNetCore;
 using Recruitment.Repositories;
 using Roles.Controller;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,24 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
+
+if(builder.Environment.IsDevelopment()) {
+    builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            // policy.WithOrigins("/",
+            //                     "127.0.0.1")
+            //                     .AllowAnyHeader()
+            //                     .AllowAnyMethod();
+            policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        });
+});
+}
+
 // builder.Services.AddScoped<RoleController>();
 
 var app = builder.Build();
@@ -27,6 +46,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(options => options.AllowAnyOrigin()); 
 
 app.UseAuthorization();
 

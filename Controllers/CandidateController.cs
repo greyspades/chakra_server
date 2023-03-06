@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Candidate.Models;
 using Recruitment.Interface;
+using Microsoft.AspNetCore.Cors;
 
 namespace Candidate.Controllers;
 
@@ -77,6 +78,7 @@ public class CandidateController : ControllerBase
         }
     }
 
+    [DisableCors]
     [HttpPost]
     public async Task<ActionResult<List<CandidateModel>>> CreateCandidate(CandidateModel payload)
     {
@@ -89,7 +91,7 @@ public class CandidateController : ControllerBase
 
             var data = await _repo.CreateCandidate(payload);
 
-            var sample = new
+            var  sample = new
             {
                 code = 200,
                 data

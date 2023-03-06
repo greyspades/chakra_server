@@ -89,3 +89,6 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\obj\Debug\net7.0\Recruitment_po
 C:\Users\LAPO Mfb\development\Recruitment_portal\obj\Debug\net7.0\ref\Recruitment_portal.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.AspNetCore.NodeServices.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Newtonsoft.Json.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.AspNetCore.JsonPatch.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Newtonsoft.Json.Bson.dll
