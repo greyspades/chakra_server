@@ -56,7 +56,7 @@ public class RoleController : ControllerBase
             var response = new
             {
                 code = 200,
-                message = "Successful",
+                message = "Successfully added new Role",
                 data
             };
 
@@ -71,25 +71,30 @@ public class RoleController : ControllerBase
         }
     }
 
-    // [HttpPost]
-    // public async Task<ActionResult> UpdateRole(RoleModel payload) {
-    //     try{
-    //         using var connection = new SqlConnection(_config.GetConnectionString("DEfaultConnection"));
+    [HttpPost("edit")]
+    public async Task<ActionResult<RoleModel>> UpdateRole(RoleModel payload) {
+        try {
+            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            var data = await connection.ExecuteAsync("UPDATE roles SET id=@Id, name=@Name, unit=@Unit, description=@Description, experience=@Experience, deadline=@Deadline WHERE id = @Id", payload);
 
-    //         var data = await connection.ExecuteAsync("",payload);
+            var response = new
+            {
+                code = 200,
+                message = "Successfully Updated Role",
+                data
+            };
 
-    //         return Ok(data);
-    //     }
-    //     catch(Exception e) {
+            return Ok(response);
+        }
+        catch(Exception e) {
+            Console.WriteLine(value: e.Message);
 
-    //         Console.WriteLine(e.Message);
-
-    //         return StatusCode(500, e.Message);
-    //     }
-    // }
+            return StatusCode(500, e.Message);
+        }
+    }
 
     [HttpGet("byId/{id}")]
-    public async Task<ActionResult<RoleModel>> GetRoleById(String id)
+    public async Task<ActionResult<RoleModel>> GetRoleById(string id)
     {
         try
         {

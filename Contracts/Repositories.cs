@@ -44,7 +44,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplicationDate, @Password)", payload);
+        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplicationDate, @Password, @Phone)", payload);
 
         return "Successful";
     }
@@ -56,5 +56,25 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
+    public async Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string id) {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
+        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE roleid = @Id", new { Id = id});
+
+        return data;
+    }
+    public async Task<string> UpdateStage(UpdateRole payload) {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.ExecuteAsync("UPDATE candidates SET stage = @Stage WHERE id = @Id", payload);
+
+        return "Successful";
+    }
+    public async Task<string> CancelApplication(string id) {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.ExecuteAsync("UPDATE candidate SET status = 'Canceled' WHERE id = @Id", new { Id = id});
+
+        return "Successful";
+    }
 }

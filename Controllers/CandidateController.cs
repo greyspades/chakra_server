@@ -106,6 +106,43 @@ public class CandidateController : ControllerBase
         }
     }
 
+    [HttpPost("/stage")]
+    public async Task<ActionResult> UpdateStage(UpdateRole payload) {
+        try {
+            var data = await _repo.UpdateStage(payload);
+            
+            var  response = new
+            {
+                code = 200,
+                data
+            };
+
+            return Ok(response);
+        }
+        catch(Exception e) {
+            Console.WriteLine(e.Message);
+
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [HttpGet("role/{id}")]
+    public async Task<ActionResult<List<CandidateModel>>> GetCandidateByRole(string id) {
+        try {
+            var data = await _repo.GetCandidatesByRole(id);
+            var response = new {
+                code = 200,
+                data
+                };
+            return Ok(response);
+        }
+        catch(Exception e) {
+             Console.WriteLine(e.Message);
+
+            return StatusCode(500, e.Message);
+        }
+    }
+
     [HttpPut("email")]
     public async Task<ActionResult<List<CandidateModel>>> UpdateData(UpdateEmail payload)
     {
@@ -128,4 +165,23 @@ public class CandidateController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpPost("/cancel")]
+    public async Task<ActionResult> CancelApplication(string id) {
+        try {
+            var data = await _repo.CancelApplication(id);
+
+        var response = new {
+            code = 200,
+            message = "Application Cancelled"
+        };
+
+        return Ok(response);
+        }
+        catch(Exception e) {
+            Console.WriteLine(e.Message);
+
+            return StatusCode(500, e.Message);
+        }
+    } 
 }

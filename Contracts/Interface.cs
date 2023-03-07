@@ -14,6 +14,9 @@ namespace Recruitment.Interface
        public Task<IEnumerable<CandidateModel>> GetCandidateById(string Id);
        public Task<string> CreateCandidate(CandidateModel payload);
        public Task<string> UpdateData(UpdateEmail payload);
+       public Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string id);
+       public Task<string> UpdateStage(UpdateRole payload);
+       public Task<string> CancelApplication(string id)
 
    }
 

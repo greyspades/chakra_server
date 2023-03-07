@@ -14,9 +14,15 @@ public class CandidateModel
     public string? Password { get; set; }
     public DateTime? ApplicationDate { get; set; }
     public string? Cv { get; set; }
+    public string? Phone { get; set; }
 }
 
 public class UpdateEmail {
     public string? Email { get; set; }
     public string? Id { get; set; }
+}
+
+public class UpdateRole {
+    public string? Id { get; set; }
+    public string? Stage { get; set; }
 }
