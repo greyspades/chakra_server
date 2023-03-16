@@ -102,7 +102,13 @@ public class RoleController : ControllerBase
 
             var data = await connection.QueryAsync("SELECT * FROM roles where id = @Id", new { Id = id });
 
-            return Ok(data);
+            var response = new {
+                code = 200,
+                message = "Successful",
+                data
+            };
+
+            return Ok(response);
         }
         catch (Exception e)
         {

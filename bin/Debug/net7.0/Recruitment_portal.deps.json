@@ -15,6 +15,7 @@
           "Microsoft.AspNetCore.NodeServices": "3.1.32",
           "Microsoft.AspNetCore.OpenApi": "7.0.2",
           "Microsoft.Data.SqlClient": "5.1.0",
+          "Sovren.SDK": "1.7.1",
           "Swashbuckle.AspNetCore": "6.4.0"
         },
         "runtime": {
@@ -628,6 +629,18 @@
           "lib/netstandard2.0/Newtonsoft.Json.Bson.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.2.22727"
+          }
+        }
+      },
+      "Sovren.SDK/1.7.1": {
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1",
+          "System.Text.Json": "4.7.2"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Sovren.SDK.dll": {
+            "assemblyVersion": "1.7.1.0",
+            "fileVersion": "1.7.1.0"
           }
         }
       },
@@ -1252,6 +1265,13 @@
       "sha512": "sha512-QYFyxhaABwmq3p/21VrZNYvCg3DaEoN/wUuw5nmfAf0X3HLjgupwhkEWdgfb9nvGAUIv3osmZoD3kKl4jxEmYQ==",
       "path": "newtonsoft.json.bson/1.0.2",
       "hashPath": "newtonsoft.json.bson.1.0.2.nupkg.sha512"
+    },
+    "Sovren.SDK/1.7.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HE6eiZvg0s9ySBy3bDJZeii0/EuECG8LI7iIohiqSLwySTg4uY4JSrCt5HQGRm2cMfihFLmlZVDRcJqzHiQ8HQ==",
+      "path": "sovren.sdk/1.7.1",
+      "hashPath": "sovren.sdk.1.7.1.nupkg.sha512"
     },
     "Swashbuckle.AspNetCore/6.4.0": {
       "type": "package",

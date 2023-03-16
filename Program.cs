@@ -2,8 +2,7 @@ using Recruitment.Context;
 using Recruitment.Interface;
 using Microsoft.AspNetCore;
 using Recruitment.Repositories;
-using Roles.Controller;
-using Newtonsoft.Json;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,10 +22,6 @@ if(builder.Environment.IsDevelopment()) {
     options.AddDefaultPolicy(
         policy =>
         {
-            // policy.WithOrigins("/",
-            //                     "127.0.0.1")
-            //                     .AllowAnyHeader()
-            //                     .AllowAnyMethod();
             policy.AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
@@ -45,9 +40,22 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseCors(options => options.AllowAnyOrigin()); 
+
+app.UseStaticFiles(new StaticFileOptions()
+        {
+            ServeUnknownFileTypes = true,
+            OnPrepareResponse = ctx => {
+            ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+                
+                // ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+                // ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", 
+                //   "Origin, X-Requested-With, Content-Type, Accept");
+            },
+
+        });
+
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

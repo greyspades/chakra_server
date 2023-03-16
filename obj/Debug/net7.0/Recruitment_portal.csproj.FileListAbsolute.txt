@@ -92,3 +92,5 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Newtonsoft.Jso
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.AspNetCore.JsonPatch.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Newtonsoft.Json.Bson.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Recruitment_portal.staticwebassets.runtime.json
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Sovren.SDK.dll

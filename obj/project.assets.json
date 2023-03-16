@@ -984,6 +984,23 @@
           }
         }
       },
+      "Sovren.SDK/1.7.1": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "9.0.1",
+          "System.Text.Json": "4.7.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/Sovren.SDK.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Sovren.SDK.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Swashbuckle.AspNetCore/6.4.0": {
         "type": "package",
         "dependencies": {
@@ -2846,6 +2863,20 @@
         "newtonsoft.json.bson.nuspec"
       ]
     },
+    "Sovren.SDK/1.7.1": {
+      "sha512": "HE6eiZvg0s9ySBy3bDJZeii0/EuECG8LI7iIohiqSLwySTg4uY4JSrCt5HQGRm2cMfihFLmlZVDRcJqzHiQ8HQ==",
+      "type": "package",
+      "path": "sovren.sdk/1.7.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "images/icon.png",
+        "lib/netstandard2.0/Sovren.SDK.dll",
+        "lib/netstandard2.0/Sovren.SDK.xml",
+        "sovren.sdk.1.7.1.nupkg.sha512",
+        "sovren.sdk.nuspec"
+      ]
+    },
     "Swashbuckle.AspNetCore/6.4.0": {
       "sha512": "eUBr4TW0up6oKDA5Xwkul289uqSMgY0xGN4pnbOIBqCcN9VKGGaPvHX3vWaG/hvocfGDP+MGzMA0bBBKz2fkmQ==",
       "type": "package",
@@ -3886,6 +3917,7 @@
       "Microsoft.AspNetCore.NodeServices >= 3.1.32",
       "Microsoft.AspNetCore.OpenApi >= 7.0.2",
       "Microsoft.Data.SqlClient >= 5.1.0",
+      "Sovren.SDK >= 1.7.1",
       "Swashbuckle.AspNetCore >= 6.4.0"
     ]
   },
@@ -3956,6 +3988,10 @@
             "target": "Package",
             "version": "[5.1.0, )"
           },
+          "Sovren.SDK": {
+            "target": "Package",
+            "version": "[1.7.1, )"
+          },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "[6.4.0, )"
@@ -3980,7 +4016,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files (x86)\\dotnet\\sdk\\7.0.103\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files (x86)\\dotnet\\sdk\\7.0.104\\RuntimeIdentifierGraph.json"
       }
     }
   }

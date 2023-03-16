@@ -1,11 +1,37 @@
 {
   "Version": 1,
-  "Hash": "LVKIS4NUVLrjksL6kuu2itRrgh/aOvKzwUZIXSvN20M=",
+  "Hash": "7+iThgj3lEE8h+CicPcWDwWUIApdQ6LyD+1lw4PsBB4=",
   "Source": "Recruitment_portal",
   "BasePath": "_content/Recruitment_portal",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "Recruitment_portal\\wwwroot",
+      "Source": "Recruitment_portal",
+      "ContentRoot": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\",
+      "BasePath": "_content/Recruitment_portal",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\resume.pdf",
+      "SourceId": "Recruitment_portal",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\",
+      "BasePath": "_content/Recruitment_portal",
+      "RelativePath": "cv/resume.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\cv\\resume.pdf"
+    }
+  ]
 }
