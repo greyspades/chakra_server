@@ -3,6 +3,7 @@ using Recruitment.Interface;
 using Microsoft.AspNetCore;
 using Recruitment.Repositories;
 using Microsoft.Extensions.FileProviders;
+using Resume.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,9 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
+builder.Services.Configure<ResumeDbSettings>(
+    builder.Configuration.GetSection("ResumeDatabase"));
+
 
 if(builder.Environment.IsDevelopment()) {
     builder.Services.AddCors(options =>
@@ -28,8 +32,6 @@ if(builder.Environment.IsDevelopment()) {
         });
 });
 }
-
-// builder.Services.AddScoped<RoleController>();
 
 var app = builder.Build();
 

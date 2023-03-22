@@ -1,8 +1,92 @@
 {
   "Files": [
     {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\resume.pdf",
-      "PackagePath": "staticwebassets\\cv\\resume.pdf"
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\15fd0033-686e-4269-b38e-4bc77818a4eb.docx",
+      "PackagePath": "staticwebassets\\cv\\15fd0033-686e-4269-b38e-4bc77818a4eb.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\1b91ff0e-06f4-4ed9-8f30-747f0091890a.docx",
+      "PackagePath": "staticwebassets\\cv\\1b91ff0e-06f4-4ed9-8f30-747f0091890a.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\20e6ab03-08a6-4770-8c4e-01c0515d11f0.docx",
+      "PackagePath": "staticwebassets\\cv\\20e6ab03-08a6-4770-8c4e-01c0515d11f0.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\31b0f8af-d89d-4a2d-b524-d6d60cd36943.docx",
+      "PackagePath": "staticwebassets\\cv\\31b0f8af-d89d-4a2d-b524-d6d60cd36943.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\3459a0e4-0044-4770-8414-5a427be4c893.docx",
+      "PackagePath": "staticwebassets\\cv\\3459a0e4-0044-4770-8414-5a427be4c893.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\3daa4d60-0cf6-4eef-af09-7c45319dfc7c.docx",
+      "PackagePath": "staticwebassets\\cv\\3daa4d60-0cf6-4eef-af09-7c45319dfc7c.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\7e4fc820-30dd-4d08-85b1-93f338a7f683.pdf",
+      "PackagePath": "staticwebassets\\cv\\7e4fc820-30dd-4d08-85b1-93f338a7f683.pdf"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\8aac5100-f7ec-499c-bd19-e7335980344a.docx",
+      "PackagePath": "staticwebassets\\cv\\8aac5100-f7ec-499c-bd19-e7335980344a.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\ad8126d0-bd33-44cb-8c7b-539ad5bca1b8.docx",
+      "PackagePath": "staticwebassets\\cv\\ad8126d0-bd33-44cb-8c7b-539ad5bca1b8.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\bf2bb0e7-7372-44fe-afbe-83f53e34fa1a.docx",
+      "PackagePath": "staticwebassets\\cv\\bf2bb0e7-7372-44fe-afbe-83f53e34fa1a.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\c31cdce4-6025-40ba-888e-615dc74755fc.docx",
+      "PackagePath": "staticwebassets\\cv\\c31cdce4-6025-40ba-888e-615dc74755fc.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\ddac13r0.gdn",
+      "PackagePath": "staticwebassets\\cv\\ddac13r0.gdn"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\e3dd34f8-c75c-404e-a65f-b575099a81af.docx",
+      "PackagePath": "staticwebassets\\cv\\e3dd34f8-c75c-404e-a65f-b575099a81af.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\ec987f2b-fe69-4830-9049-ad0cee0e8d96.docx",
+      "PackagePath": "staticwebassets\\cv\\ec987f2b-fe69-4830-9049-ad0cee0e8d96.docx"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\f3d1a44b-4a7e-4c27-b835-cf492eb3ac30",
+      "PackagePath": "staticwebassets\\cv"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\file.txt",
+      "PackagePath": "staticwebassets\\cv\\file.txt"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\myfile.pdf",
+      "PackagePath": "staticwebassets\\cv\\myfile.pdf"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\thatfile.pdf",
+      "PackagePath": "staticwebassets\\cv\\thatfile.pdf"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\thefile.pdf",
+      "PackagePath": "staticwebassets\\cv\\thefile.pdf"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\thefile2.pdf",
+      "PackagePath": "staticwebassets\\cv\\thefile2.pdf"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\thefile21.pdf",
+      "PackagePath": "staticwebassets\\cv\\thefile21.pdf"
+    },
+    {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\xc0cmjiq.0lc",
+      "PackagePath": "staticwebassets\\cv\\xc0cmjiq.0lc"
     },
     {
       "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.Recruitment_portal.Microsoft.AspNetCore.StaticWebAssets.props",

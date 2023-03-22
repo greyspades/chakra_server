@@ -40,6 +40,10 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
+            "Aspose.Words": {
+              "target": "Package",
+              "version": "[23.3.0, )"
+            },
             "Dapper": {
               "target": "Package",
               "version": "[2.0.123, )"
@@ -67,6 +71,22 @@
             "Microsoft.Data.SqlClient": {
               "target": "Package",
               "version": "[5.1.0, )"
+            },
+            "MongoDB.Driver": {
+              "target": "Package",
+              "version": "[2.19.0, )"
+            },
+            "MongoDB.Driver.GridFS": {
+              "target": "Package",
+              "version": "[2.19.0, )"
+            },
+            "MongoDBQueue.Legacy": {
+              "target": "Package",
+              "version": "[1.2.3.2, )"
+            },
+            "PdfSharp": {
+              "target": "Package",
+              "version": "[1.50.5147, )"
             },
             "Sovren.SDK": {
               "target": "Package",

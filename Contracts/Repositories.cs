@@ -10,8 +10,7 @@ using System.Drawing.Printing;
 using Sovren;
 using Sovren.Models;
 using Sovren.Models.API.Parsing;
-using Sovren.Models.Resume.Education;
-using System.Linq;
+using MongoDB.Driver;
 
 namespace Recruitment.Repositories;
 public class CandidateRepository : ICandidateRepository
@@ -40,7 +39,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplicationDate, @Password, @Phone)", payload);
+        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, appldate, password, phone, experience, skills, cvpath, cvextension, education) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplicationDate, @Password, @Phone, @Expereince, @Skills, @CvPath, @CvExtension, @Education)", payload);
 
         return "Successful";
     }
@@ -52,35 +51,40 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
-    public async Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string id) {
+    public async Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string id)
+    {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE roleid = @Id", new { Id = id});
+        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE roleid = @Id", new { Id = id });
 
         return data;
     }
-    public async Task<string> UpdateStage(UpdateRole payload) {
+    public async Task<string> UpdateStage(UpdateRole payload)
+    {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         var data = await connection.ExecuteAsync("UPDATE candidates SET stage = @Stage WHERE id = @Id", payload);
 
         return "Successful";
     }
-    public async Task<IEnumerable<CandidateModel>> CheckEmail(string mail) {
+    public async Task<IEnumerable<CandidateModel>> CheckEmail(string mail)
+    {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email", new { Email = mail});
+        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email", new { Email = mail });
 
         return data;
     }
-    public async Task<string> CancelApplication(CancelApplication payload) {
+    public async Task<string> CancelApplication(CancelApplication payload)
+    {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         var data = await connection.ExecuteAsync("UPDATE candidates SET status = 'Canceled' WHERE id = @Id", payload);
 
         return "Successful";
     }
-    public async Task<IEnumerable<CandidateModel>> GetStatus(GetStatus payload) {
+    public async Task<IEnumerable<CandidateModel>> GetStatus(GetStatus payload)
+    {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email and password = @Password", payload);
@@ -88,91 +92,90 @@ public class CandidateRepository : ICandidateRepository
         return data;
     }
 
-    public async Task<string> ParseCv(IFormFile formFile) {
-        var filePath = Path.Combine("C:/Users/LAPO Mfb/Desktop/cv");
-        if(!Directory.Exists(filePath)) {
+    public async Task<dynamic> ParseCv(IFormFile formFile)
+    {
+        var filePath = Path.Combine("wwwroot/cv", formFile.FileName);
+        if (!Directory.Exists(filePath))
+        {
             Directory.CreateDirectory(filePath);
         }
-        string path = filePath;
+        Guid guid = Guid.NewGuid();
 
-        using (Stream stream = new FileStream(filePath, FileMode.Create)){
-            await formFile.CopyToAsync(stream);
-        }
-        Console.WriteLine(path);
+        var extension = Path.GetExtension(formFile.FileName);
+        Console.WriteLine(extension);
 
-        // using var stream = File.Create(filePath);
+        var fileData = new
+        {
+            extension,
+            id = guid.ToString()
+        };
+
+        // var stream = new FileStream($"wwwroot/cv/{guid}.docx", FileMode.OpenOrCreate, FileAccess.ReadWrite);
         // await formFile.CopyToAsync(stream);
-        // Console.WriteLine(filePath);
 
-    // Process uploaded files
-    // Don't rely on or trust the FileName property without validation.
-    // Console.WriteLine(new { count = files.Count, size });
-
-    return path;
+        return fileData;
     }
-    public async Task<dynamic> ParseCvData(IFormFile cv) {
+
+    public async Task<byte[]> GetBytes(IFormFile formFile)
+    {
+        await using var memoryStream = new MemoryStream();
+        await formFile.CopyToAsync(memoryStream);
+        return memoryStream.ToArray();
+    }
+
+    public async Task<dynamic> ParseCvData(IFormFile cv)
+    {
         SovrenClient client = new SovrenClient("39626765", "Gz5jNQ3fSzfuClZuAo1RjqOaJkKBsKSN6pHc0KK/", DataCenter.EU);
 
         var path = "C:/Users/LAPO Mfb/Desktop/cv/resume.pdf";
-
-        Document doc = new(path);
-
-        // Document doc = new Document('');
-
-        ParseRequest request = new ParseRequest(doc, new ParseOptions());
-
         try
-    {
-        ParseResumeResponse response = await client.ParseResume(request);
-        Console.WriteLine("made a successful request" );
-        //if we get here, it was 200-OK and all operations succeeded
+        {
+            var bytes = await GetBytes(cv);
 
-        //now we can use the response from Sovren to output some of the data from the resume
-        if(response != null) {
-            var res = new {
-            firstname = response.EasyAccess().GetCandidateName().GivenName,
-            lastname = response.EasyAccess().GetCandidateName().FamilyName,
-            email = response.EasyAccess().GetEmailAddresses()?.FirstOrDefault<dynamic>(),
-            // education = response.EasyAccess().GetAllEducationFocusAreas()?.FirstOrDefault<dynamic>(),
-            employers = response.EasyAccess().GetAllEmployers()?.FirstOrDefault<dynamic>(),
+            Document doc = new(bytes, File.GetLastWriteTime(path));
 
-            roles = response.EasyAccess().GetAllJobTitles()?.FirstOrDefault<dynamic>(),
+            ParseRequest request = new(doc);
 
-            experienx = response?.Value?.ResumeData?.EmploymentHistory?.Positions,
+            ParseResumeResponse response = await client.ParseResume(request);
+            Console.WriteLine("made a successful request");
+            //if we get here, it was 200-OK and all operations succeeded
 
-            degree = response.EasyAccess().GetHighestDegree()?.Name,
-            contact = response.EasyAccess().GetContactInfo()?.Telephones?.FirstOrDefault<dynamic>(),
-            address = response.EasyAccess().GetContactInfo()?.Location?.Regions?.FirstOrDefault<dynamic>(),
-        };
+            //now we can use the response from Sovren to output some of the data from the resume
+            if (response != null)
+            {
+                var res = new
+                {
+                    firstname = response.EasyAccess().GetCandidateName().GivenName,
+                    lastname = response.EasyAccess().GetCandidateName().FamilyName,
+                    email = response.EasyAccess().GetEmailAddresses()?.FirstOrDefault<dynamic>(),
+                    employers = response.EasyAccess().GetAllEmployers()?.FirstOrDefault<dynamic>(),
+                    roles = response.EasyAccess().GetAllJobTitles()?.FirstOrDefault<dynamic>(),
+                    experience = response?.Value?.ResumeData?.EmploymentHistory?.Positions,
+                    degree = response.EasyAccess().GetHighestDegree()?.Name,
+                    contact = response.EasyAccess().GetContactInfo()?.Telephones?.FirstOrDefault<dynamic>(),
+                    address = response.EasyAccess().GetContactInfo()?.Location?.Regions?.FirstOrDefault<dynamic>(),
+                    skills = response?.Value?.ResumeData.Skills,
+                    education = response?.Value?.ResumeData?.Education
+                };
 
-        return res;
+                return res;
+            }
+            else
+            {
+                return new
+                {
+                    code = 500,
+                    message = "could not process the request"
+                };
+            }
+
         }
-        else {
-            return new {
-                code = 500,
-                message = "could not process the request"
-            };
+        catch (SovrenException e)
+        {
+            //the document could not be parsed, always try/catch for SovrenExceptions when using SovrenClient
+            Console.WriteLine($"Error: {e.SovrenErrorCode}, Message: {e.Message}");
+
+            return e.Message;
         }
-
-        
     }
-    catch (SovrenException e)
-    {
-        //the document could not be parsed, always try/catch for SovrenExceptions when using SovrenClient
-        Console.WriteLine($"Error: {e.SovrenErrorCode}, Message: {e.Message}");
-
-        return e.Message;
-    }
-    }
-
-    // public async Task<ActionResult<File>> GetResume(string id) {
-
-    // //     var path = "<Get the file path using the ID>";
-    // // var stream = File.OpenRead(path);
-    // // return new FileStreamResult(stream, "application/octet-stream");
-
-    //     var content = new FileStream("C:/Users/LAPO Mfb/Desktop/cv/resume.pdf",FileMode.Open, FileAccess.Read, FileShare.Read);
-    //     var response = File(content, "application/octet-stream");//FileStreamResult
-    //     return response;
-    // }
 }

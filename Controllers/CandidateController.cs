@@ -5,6 +5,14 @@ using Recruitment.Interface;
 using Microsoft.AspNetCore.Cors;
 using System.Security;
 using Microsoft.AspNetCore.StaticFiles;
+using Resume.Models;
+using MongoDB.Driver;
+using Microsoft.Extensions.Options;
+using MongoDB.Helpers;
+using System.Diagnostics;
+using PdfSharp;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
 
 namespace Candidate.Controllers;
 
@@ -15,10 +23,21 @@ public class CandidateController : ControllerBase
     Guid guid = Guid.NewGuid();
     private readonly ICandidateRepository _repo;
     public IWebHostEnvironment _env;
-    public CandidateController(IWebHostEnvironment environment, ICandidateRepository repo)
+    private readonly IMongoCollection<ResumeModel> _collection;
+    private readonly IMongoDatabase _mongoDb;
+    public CandidateController(IWebHostEnvironment environment, ICandidateRepository repo, IOptions<ResumeDbSettings> dbSettings)
     {
         this._repo = repo;
         this._env = environment;
+        var mongoClient = new MongoClient(
+            dbSettings.Value.ConnectionString);
+
+        var mongoDatabase = mongoClient.GetDatabase(
+            dbSettings.Value.DatabaseName);
+
+        _collection = mongoDatabase.GetCollection<ResumeModel>(
+            dbSettings.Value.CollectionName);
+        _mongoDb = mongoDatabase;
     }
 
     [HttpGet]
@@ -33,27 +52,6 @@ public class CandidateController : ControllerBase
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return StatusCode(500, e.Message);
-        }
-    }
-
-    [HttpGet("test")]
-    public async Task<ActionResult<List<CandidateModel>>> TestEndpoint()
-    {
-        try
-        {
-            var sample = new
-            {
-                code = 200,
-                message = "ludex gundyr"
-            };
-
-            return Ok(sample);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-
             return StatusCode(500, e.Message);
         }
     }
@@ -84,7 +82,7 @@ public class CandidateController : ControllerBase
 
     [DisableCors]
     [HttpPost]
-    public async Task<ActionResult<List<CandidateModel>>> CreateCandidate([FromForm] CandidateModel payload)
+    public async Task<ActionResult<List<CandidateModel>>> CreateCandidate(CandidateModel payload)
     {
         if (ModelState.IsValid)
         {
@@ -169,18 +167,21 @@ public class CandidateController : ControllerBase
     [HttpPost("/upload")]
     public async Task<ActionResult> UploadCv(IFormFile cv) {
         try {
-  
             Console.WriteLine(cv.FileName);
                 if(cv != null) {
                     Console.WriteLine("theres something alright");
-                    // var cvPath = await _repo.ParseCv(cv);
-                    //  Console.WriteLine("path is" + cvPath);
-                    var data = await _repo.ParseCvData(cv);
-                    Console.WriteLine(data);
+                    
+                    var data = await _repo.ParseCv(cv);
+
+                    // var data = await MongoHelpers.UploadFromStreamAsync(cv, _mongoDb);
+                    var cvMetadata = await _repo.ParseCvData(cv);
+                    // Console.WriteLine(data);
+
                      var response = new  {
                         code = 200,
                         message = "success",
-                        data
+                        data,
+                        cvMeta = cvMetadata
                      };
 
                      return Ok(response);
@@ -313,15 +314,22 @@ public class CandidateController : ControllerBase
     {
         try
         {
-            var path = "C:/Users/LAPO Mfb/Desktop/cv/resume.pdf";
+            var path = "wwwroot/cv/7e4fc820-30dd-4d08-85b1-93f338a7f683.pdf";
 
-            // var content = new FileStream("C:/Users/LAPO Mfb/Desktop/cv/resume.pdf", FileMode.Open, FileAccess.Read, FileShare.Read);
-
-            // var response = File(content, "application/octet-stream");//FileStreamResult
-
-            var fileName = Path.GetFileName(path);
+            // var fileName = Path.GetFileName(path);
             var content = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             return File(content, "application/octet-stream");
+
+            // var stream = await MongoHelpers.DownloadFromStreamAsync("resume.pdf", _mongoDb);
+            // var content = new FileStream("wwwroot/cv/myfile.pdf", FileMode.CreateNew, FileAccess.Write);
+            // content.WriteByte( stream);
+            // byte[] bytes = new byte[stream.Length];
+            // stream.Read(bytes, 0, (int)stream.Length);
+            // await content.WriteAsync(bytes, 0, bytes.Length);
+            // PdfDocument pdf = new PdfDocument();
+            // await stream.WriteAsync(bytes, 0, bytes.Length);
+            // await content.WriteAsync(stream);
+            // return File(stream, "application/octet-stream");
 
         }
         catch (Exception e)

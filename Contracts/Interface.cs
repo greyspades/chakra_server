@@ -18,8 +18,9 @@ namespace Recruitment.Interface
        public Task<string> CancelApplication(CancelApplication id);
        public Task<IEnumerable<CandidateModel>> GetStatus(GetStatus payload);
        public Task<IEnumerable<CandidateModel>> CheckEmail(string mail);
-       public Task<string> ParseCv(IFormFile formFile);
+       public Task<dynamic> ParseCv(IFormFile formFile);
        public Task<dynamic> ParseCvData(IFormFile cv);
+       public Task<byte[]> GetBytes(IFormFile formFile);
     }
 
    public interface IRolesRepository

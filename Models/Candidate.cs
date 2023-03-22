@@ -24,6 +24,11 @@ public class CandidateModel
     [Phone(ErrorMessage = "Not a valid phone number")]
     public string? Phone { get; set; }
     public string? CvPath { get; set; }
+    public string? CvExtension { get; set; }
+    // public ExperienceModel[]? Expereince { get; set; }
+    public string? Experience { get; set; }
+    public string? Skills { get; set; }
+    public string? Education { get; set; }
 }
 
 public class UpdateEmail {
@@ -49,4 +54,11 @@ public class UpdateRole {
 
 public class CancelApplication {
     public string? Id { get; set; }
+}
+public class ExperienceModel {
+    public string? Employer { get; set; }
+    public string? StartDate { get; set; }
+    public string? EndDate { get; set; }
+    public string? Title { get; set; }
+    public string? Description { get; set; }
 }
