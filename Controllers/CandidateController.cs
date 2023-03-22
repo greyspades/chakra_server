@@ -88,23 +88,21 @@ public class CandidateController : ControllerBase
         {
             try
             {
-                payload.Id = guid.ToString();
+                var uuid = guid;
+                if(payload.Cv != null) {
+                    var fileData = await _repo.ParseCvAsync(payload.Cv, uuid);
+                }
+                payload.Id = uuid.ToString();
                 payload.ApplicationDate = DateTime.Now.Date;
                 payload.Stage = "1";
                 payload.Status = "Pending";
+                // payload.CvPath = fileData.id;
+                // payload.CvExtension = fileData.extension;
 
                 var dateDifference = (DateTime.Now.Date - payload?.Dob.Value)?.TotalDays;
 
                 var mail = await _repo.CheckEmail(payload.Email);
-                Console.WriteLine("got to the endpoint though");
-                // Console.WriteLine(payload.Cv);
-                // if(payload.Cv != null) {
-                //     Console.WriteLine("theres something alright");
-                //     var cvPath = _repo.ParseCv(payload.Cv);
-                //      Console.WriteLine("path is" + cvPath);
-                // }
-                // payload.CvPath = cvPath;
-
+                
                 if (
                     // dateDifference > 6570 && 
                 !mail.Any())
@@ -170,18 +168,13 @@ public class CandidateController : ControllerBase
             Console.WriteLine(cv.FileName);
                 if(cv != null) {
                     Console.WriteLine("theres something alright");
-                    
-                    var data = await _repo.ParseCv(cv);
-
-                    // var data = await MongoHelpers.UploadFromStreamAsync(cv, _mongoDb);
-                    var cvMetadata = await _repo.ParseCvData(cv);
-                    // Console.WriteLine(data);
-
+                    var data = await _repo.ParseCvAsync(cv, guid);
+                    var cvMetaData = await _repo.ParseCvData(cv);
                      var response = new  {
                         code = 200,
                         message = "success",
                         data,
-                        cvMeta = cvMetadata
+                        cvMeta = cvMetaData
                      };
 
                      return Ok(response);
@@ -310,11 +303,11 @@ public class CandidateController : ControllerBase
 
 
     [HttpGet("/resume")]
-    public ActionResult GetResume()
+    public ActionResult GetResume(string id)
     {
         try
         {
-            var path = "wwwroot/cv/7e4fc820-30dd-4d08-85b1-93f338a7f683.pdf";
+            var path = $"wwwroot/cv/{id}.pdf";
 
             // var fileName = Path.GetFileName(path);
             var content = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);

@@ -29,6 +29,8 @@ public class CandidateModel
     public string? Experience { get; set; }
     public string? Skills { get; set; }
     public string? Education { get; set; }
+    [Required]
+    public IFormFile? Cv { get; set; }
 }
 
 public class UpdateEmail {

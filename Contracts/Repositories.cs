@@ -92,26 +92,25 @@ public class CandidateRepository : ICandidateRepository
         return data;
     }
 
-    public async Task<dynamic> ParseCv(IFormFile formFile)
+    public async Task<dynamic> ParseCvAsync(IFormFile formFile, Guid id)
     {
         var filePath = Path.Combine("wwwroot/cv", formFile.FileName);
         if (!Directory.Exists(filePath))
         {
             Directory.CreateDirectory(filePath);
         }
-        Guid guid = Guid.NewGuid();
+        string guid = id.ToString();
 
         var extension = Path.GetExtension(formFile.FileName);
-        Console.WriteLine(extension);
 
         var fileData = new
         {
             extension,
-            id = guid.ToString()
+            id = guid
         };
 
-        // var stream = new FileStream($"wwwroot/cv/{guid}.docx", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-        // await formFile.CopyToAsync(stream);
+        var stream = new FileStream($"wwwroot/cv/{guid}.docx", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+        await formFile.CopyToAsync(stream);
 
         return fileData;
     }
