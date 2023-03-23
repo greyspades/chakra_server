@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "OGVFdQ2ymtmv4ovOVLzJRO1sEm8W6KNxuZKlLlWhZFg=",
+  "Hash": "HRxGyR7g+rxcqPMceyZz7fWTXSRiuIINqOBWlCPMExY=",
   "Source": "Recruitment_portal",
   "BasePath": "_content/Recruitment_portal",
   "Mode": "Default",
@@ -51,6 +51,40 @@
       "OriginalItemSpec": "wwwroot\\cv\\1b91ff0e-06f4-4ed9-8f30-747f0091890a.docx"
     },
     {
+      "Identity": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\261f9d4c-c062-4ce6-8736-6825bfc2d20c.docx",
+      "SourceId": "Recruitment_portal",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\",
+      "BasePath": "_content/Recruitment_portal",
+      "RelativePath": "cv/261f9d4c-c062-4ce6-8736-6825bfc2d20c.docx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\cv\\261f9d4c-c062-4ce6-8736-6825bfc2d20c.docx"
+    },
+    {
+      "Identity": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\27cc34c0-dd59-4269-a083-a5d1851d3aaa.docx",
+      "SourceId": "Recruitment_portal",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\",
+      "BasePath": "_content/Recruitment_portal",
+      "RelativePath": "cv/27cc34c0-dd59-4269-a083-a5d1851d3aaa.docx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\cv\\27cc34c0-dd59-4269-a083-a5d1851d3aaa.docx"
+    },
+    {
       "Identity": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\3daa4d60-0cf6-4eef-af09-7c45319dfc7c.docx",
       "SourceId": "Recruitment_portal",
       "SourceType": "Discovered",
@@ -66,6 +100,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\cv\\3daa4d60-0cf6-4eef-af09-7c45319dfc7c.docx"
+    },
+    {
+      "Identity": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\4fe3a3b1-f787-49e9-ac87-5d482ba6b432.docx",
+      "SourceId": "Recruitment_portal",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\",
+      "BasePath": "_content/Recruitment_portal",
+      "RelativePath": "cv/4fe3a3b1-f787-49e9-ac87-5d482ba6b432.docx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\cv\\4fe3a3b1-f787-49e9-ac87-5d482ba6b432.docx"
     },
     {
       "Identity": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\57528fca-23c6-438b-b1cf-e6381035e7b0.docx",
@@ -100,6 +151,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\cv\\7e4fc820-30dd-4d08-85b1-93f338a7f683.pdf"
+    },
+    {
+      "Identity": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\ae450a9c-57c2-4518-8d89-6bcacda2ec75.docx",
+      "SourceId": "Recruitment_portal",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\",
+      "BasePath": "_content/Recruitment_portal",
+      "RelativePath": "cv/ae450a9c-57c2-4518-8d89-6bcacda2ec75.docx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\cv\\ae450a9c-57c2-4518-8d89-6bcacda2ec75.docx"
     },
     {
       "Identity": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\db0e7f22-aab0-4f98-8f51-f1716457a526.docx",

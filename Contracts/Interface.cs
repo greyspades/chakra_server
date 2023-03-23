@@ -21,6 +21,7 @@ namespace Recruitment.Interface
        public Task<dynamic> ParseCvAsync(IFormFile formFile, Guid id);
        public Task<dynamic> ParseCvData(IFormFile cv);
        public Task<byte[]> GetBytes(IFormFile formFile);
+       public Task<IEnumerable<string>> GetSkills(string id);
     }
 
    public interface IRolesRepository

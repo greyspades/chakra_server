@@ -11,6 +11,8 @@ using Sovren;
 using Sovren.Models;
 using Sovren.Models.API.Parsing;
 using MongoDB.Driver;
+using AsposeDoc = global::Aspose.Words;
+using MongoDB.Driver.Core.WireProtocol.Messages;
 
 namespace Recruitment.Repositories;
 public class CandidateRepository : ICandidateRepository
@@ -39,7 +41,10 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, appldate, password, phone, experience, skills, cvpath, cvextension, education) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplicationDate, @Password, @Phone, @Expereince, @Skills, @CvPath, @CvExtension, @Education)", payload);
+        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone, experience, cvpath, cvextension, education, gender) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplDate, @Password, @Phone, @Experience, @CvPath, @CvExtension, @Education, @Gender)", payload);
+        for(int i = 0; i< payload?.Skills.Count; i ++) {
+            await connection.ExecuteAsync("INSERT into Skills(id, skill) VALUES(@Xid, @Item)", new { Item = payload.Skills[i], Xid = payload.Id});
+        }
 
         return "Successful";
     }
@@ -57,6 +62,13 @@ public class CandidateRepository : ICandidateRepository
 
         var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE roleid = @Id", new { Id = id });
 
+        return data;
+    }
+    public async Task<IEnumerable<string>> GetSkills(string id) {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        var data = await connection.QueryAsync<string>("SELECT skill from Skills WHERE id = @Id", new { Id = id });
+        
         return data;
     }
     public async Task<string> UpdateStage(UpdateRole payload)
@@ -94,23 +106,23 @@ public class CandidateRepository : ICandidateRepository
 
     public async Task<dynamic> ParseCvAsync(IFormFile formFile, Guid id)
     {
-        var filePath = Path.Combine("wwwroot/cv", formFile.FileName);
-        if (!Directory.Exists(filePath))
-        {
-            Directory.CreateDirectory(filePath);
-        }
         string guid = id.ToString();
 
         var extension = Path.GetExtension(formFile.FileName);
-
+        var path = $"C:/Users/LAPO Mfb/Desktop/cv/{guid}.{extension}";
+        var path2 = $"wwwroot/cv/{guid}.docx";
         var fileData = new
         {
             extension,
             id = guid
         };
-
-        var stream = new FileStream($"wwwroot/cv/{guid}.docx", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-        await formFile.CopyToAsync(stream);
+        using(var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite)) {
+            await formFile.CopyToAsync(stream);
+        }
+        if(extension != ".pdf") {
+            var doc = new AsposeDoc.Document(path);
+            doc.Save($"C:/Users/LAPO Mfb/Desktop/cv/{guid}..pdf");
+        }
 
         return fileData;
     }

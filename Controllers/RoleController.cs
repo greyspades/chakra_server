@@ -119,7 +119,7 @@ public class RoleController : ControllerBase
     }
 
     [HttpGet("byUnit/{unit}")]
-    public async Task<ActionResult<RoleModel>> GetRoleByDivision(String unit)
+    public async Task<ActionResult<RoleModel>> GetRoleByDivision(string unit)
     {
         try
         {

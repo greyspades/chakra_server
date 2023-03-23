@@ -13,6 +13,7 @@ using System.Diagnostics;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using Aspose.Words;
 
 namespace Candidate.Controllers;
 
@@ -82,7 +83,7 @@ public class CandidateController : ControllerBase
 
     [DisableCors]
     [HttpPost]
-    public async Task<ActionResult<List<CandidateModel>>> CreateCandidate(CandidateModel payload)
+    public async Task<ActionResult<List<CandidateModel>>> CreateCandidate([FromForm] CandidateModel payload)
     {
         if (ModelState.IsValid)
         {
@@ -93,7 +94,7 @@ public class CandidateController : ControllerBase
                     var fileData = await _repo.ParseCvAsync(payload.Cv, uuid);
                 }
                 payload.Id = uuid.ToString();
-                payload.ApplicationDate = DateTime.Now.Date;
+                payload.ApplDate = DateTime.Now;
                 payload.Stage = "1";
                 payload.Status = "Pending";
                 // payload.CvPath = fileData.id;
@@ -107,6 +108,7 @@ public class CandidateController : ControllerBase
                     // dateDifference > 6570 && 
                 !mail.Any())
                 {
+                    Console.WriteLine("got there");
                     var data = await _repo.CreateCandidate(payload);
 
                     var sample = new
@@ -160,6 +162,24 @@ public class CandidateController : ControllerBase
         {
             return StatusCode(500, "Invalid request body");
         }
+    }
+
+    [HttpGet("skills/{id}")]
+    public async Task<ActionResult<List<string>>> GetSkills(string id) {
+        try {
+            var data = await _repo.GetSkills(id);
+
+            var response = new {
+                code = 200,
+                data
+            };
+
+            return Ok(data);
+        }
+        catch(Exception e) {
+            Console.WriteLine(e.Message);
+            return StatusCode(500, e.Message);
+        } 
     }
 
     [HttpPost("/upload")]
@@ -302,28 +322,16 @@ public class CandidateController : ControllerBase
     }
 
 
-    [HttpGet("/resume")]
-    public ActionResult GetResume(string id)
+    [HttpGet("/resume/{id}")]
+    public ActionResult<dynamic> GetResume(string id)
     {
         try
         {
-            var path = $"wwwroot/cv/{id}.pdf";
-
-            // var fileName = Path.GetFileName(path);
-            var content = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            // var path = $"wwwroot/cv/7e4fc820-30dd-4d08-85b1-93f338a7f683.pdf";
+            dynamic path2 = $"C:/Users/LAPO Mfb/Desktop/cv/{id}..pdf";
+            var extension = Path.GetExtension(path2);
+            var content = new FileStream(path2, FileMode.Open, FileAccess.Read, FileShare.Read);
             return File(content, "application/octet-stream");
-
-            // var stream = await MongoHelpers.DownloadFromStreamAsync("resume.pdf", _mongoDb);
-            // var content = new FileStream("wwwroot/cv/myfile.pdf", FileMode.CreateNew, FileAccess.Write);
-            // content.WriteByte( stream);
-            // byte[] bytes = new byte[stream.Length];
-            // stream.Read(bytes, 0, (int)stream.Length);
-            // await content.WriteAsync(bytes, 0, bytes.Length);
-            // PdfDocument pdf = new PdfDocument();
-            // await stream.WriteAsync(bytes, 0, bytes.Length);
-            // await content.WriteAsync(stream);
-            // return File(stream, "application/octet-stream");
-
         }
         catch (Exception e)
         {

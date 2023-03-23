@@ -19,7 +19,7 @@ public class CandidateModel
     [EmailAddress(ErrorMessage = "Not a valid Email format")]
     public string? Email { get; set; }
     public string? Password { get; set; }
-    public DateTime? ApplicationDate { get; set; }
+    public DateTime? ApplDate { get; set; }
     [Required]
     [Phone(ErrorMessage = "Not a valid phone number")]
     public string? Phone { get; set; }
@@ -27,10 +27,15 @@ public class CandidateModel
     public string? CvExtension { get; set; }
     // public ExperienceModel[]? Expereince { get; set; }
     public string? Experience { get; set; }
-    public string? Skills { get; set; }
+    public List<string>? Skills { get; set; }
     public string? Education { get; set; }
-    [Required]
     public IFormFile? Cv { get; set; }
+    public string? Gender { get; set; }
+}
+
+public class CandidateData {
+    public CandidateModel? data { get; set; }
+    public List<string>? skills { get; set; }
 }
 
 public class UpdateEmail {
