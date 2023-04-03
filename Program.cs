@@ -6,7 +6,6 @@ using Microsoft.Extensions.FileProviders;
 using Resume.Models;
 using Cron.Handler;
 using Quartz;
-using MailConfig;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +36,6 @@ builder.Services.Configure<ResumeDbSettings>(
 
 // builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
-builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
 
 if(builder.Environment.IsDevelopment()) {
     builder.Services.AddCors(options =>
