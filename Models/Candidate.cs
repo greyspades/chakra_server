@@ -1,5 +1,6 @@
 
 using System.ComponentModel.DataAnnotations;
+using MongoDB.Driver;
 
 namespace Candidate.Models;
 
@@ -31,11 +32,43 @@ public class CandidateModel
     public string? Education { get; set; }
     public IFormFile? Cv { get; set; }
     public string? Gender { get; set; }
+    public string? Flag { get; set; }
+    public string? OtherName { get; set; }
 }
 
 public class CandidateData {
-    public CandidateModel? data { get; set; }
-    public List<string>? skills { get; set; }
+    public CandidateModel? Data { get; set; }
+    public List<string>? Skills { get; set; }
+}
+
+public class EmailDto {
+    // public string? Name { get; set; }
+    // public string? Subject { get; set; }
+    // public string? Body { get; set; }
+    public string? Reciever { get; set; }
+    public string? Template { get; set; }
+}
+
+public class CredentialsObj {
+    public string? Token { get; set; }
+    public string? Id { get; set; }
+    public string? AesKey { get; set; }
+    public string? AesIv { get; set; }
+}
+
+public class CandidateByFlagDto {
+    public string? RoleId { get; set; }
+    public string? Flag { get; set; }
+}
+
+public class FlagCandidateDto {
+    public string? Id { get; set; }
+    public string? Flag { get; set; }
+}
+
+public class SkillsInput {
+    public string? Id { get; set; }
+    public string? Unit { get; set; }
 }
 
 public class UpdateEmail {

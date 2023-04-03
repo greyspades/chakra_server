@@ -13,6 +13,12 @@ using Sovren.Models.API.Parsing;
 using MongoDB.Driver;
 using AsposeDoc = global::Aspose.Words;
 using MongoDB.Driver.Core.WireProtocol.Messages;
+using Org.BouncyCastle.Crypto;
+using Quartz.Impl.Matchers;
+using MimeKit;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit.Text;
 
 namespace Recruitment.Repositories;
 public class CandidateRepository : ICandidateRepository
@@ -37,14 +43,23 @@ public class CandidateRepository : ICandidateRepository
 
         return data;
     }
+    // public async Task<IEnumerable<string>> GetCandidateBySkills(string skill, role) {
+    //     using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+    //     var data = await connection.QueryAsync<string>("", new { Skill = skill });
+
+    //     return data;
+    // }
     public async Task<string> CreateCandidate(CandidateModel payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone, experience, cvpath, cvextension, education, gender) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplDate, @Password, @Phone, @Experience, @CvPath, @CvExtension, @Education, @Gender)", payload);
-        for(int i = 0; i< payload?.Skills.Count; i ++) {
-            await connection.ExecuteAsync("INSERT into Skills(id, skill) VALUES(@Xid, @Item)", new { Item = payload.Skills[i], Xid = payload.Id});
-        }
+        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone, experience, cvpath, cvextension, education, gender, otherName) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplDate, @Password, @Phone, @Experience, @CvPath, @CvExtension, @Education, @Gender, @OtherName)", payload);
+
+        for (int i = 0; i < payload?.Skills.Count; i++)
+        {
+            await connection.ExecuteAsync("INSERT into Skills(id, skill, unit) VALUES(@Xid, @Item, @Unit)", new { Item = payload.Skills[i], Xid = payload.Id, Unit = payload.RoleId });
+        };
 
         return "Successful";
     }
@@ -64,11 +79,19 @@ public class CandidateRepository : ICandidateRepository
 
         return data;
     }
-    public async Task<IEnumerable<string>> GetSkills(string id) {
+    public async Task<IEnumerable<string>> GetSkills(string id)
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        var data = await connection.QueryAsync<string>("SELECT skill from Skills where id = @Id", new { Id = id });
+
+        return data;
+    }
+    public async Task<IEnumerable<string>> GetCandidateBySkills(SkillsInput payload)
+    {
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-        var data = await connection.QueryAsync<string>("SELECT skill from Skills WHERE id = @Id", new { Id = id });
-        
+        var data = await connection.QueryAsync<string>("SELECT skill from Skills WHERE id = @Id AND unit = @Unit", payload);
+
         return data;
     }
     public async Task<string> UpdateStage(UpdateRole payload)
@@ -79,11 +102,11 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
-    public async Task<IEnumerable<CandidateModel>> CheckEmail(string mail)
+    public async Task<IEnumerable<CandidateModel>> CheckEmail(CandidateModel payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email", new { Email = mail });
+        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email AND roleid = @RoleId", payload);
 
         return data;
     }
@@ -95,11 +118,27 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
+    public async Task<string> FlagCandidate(FlagCandidateDto payload)
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.ExecuteAsync("UPDATE candidates SET flag = @Flag WHERE id = @Id", payload);
+
+        return "Successful";
+    }
     public async Task<IEnumerable<CandidateModel>> GetStatus(GetStatus payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email and password = @Password", payload);
+
+        return data;
+    }
+    public async Task<IEnumerable<CandidateModel>> GetByFlag(CandidateByFlagDto payload)
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<CandidateModel>("SELECT * FROM Candidates WHERE roleid = @RoleId and flag = @Flag", payload);
 
         return data;
     }
@@ -116,12 +155,15 @@ public class CandidateRepository : ICandidateRepository
             extension,
             id = guid
         };
-        using(var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite)) {
+        using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+        {
             await formFile.CopyToAsync(stream);
         }
-        if(extension != ".pdf") {
+        if (extension != ".pdf")
+        {
             var doc = new AsposeDoc.Document(path);
             doc.Save($"C:/Users/LAPO Mfb/Desktop/cv/{guid}..pdf");
+            File.Delete(path);
         }
 
         return fileData;
@@ -188,5 +230,26 @@ public class CandidateRepository : ICandidateRepository
 
             return e.Message;
         }
+    }
+
+    public void SendMail(EmailDto payload)
+    {
+        var email = new MimeMessage();
+        email.From.Add(MailboxAddress.Parse("greyspades99@gmail.com"));
+        email.To.Add(MailboxAddress.Parse(payload.Reciever));
+        if(payload.Template == "notFit") {
+            email.Subject = "Sorry not a fit";
+            email.Body = new TextPart(TextFormat.Plain) { Text = "Sorry you arent a fit for this role, you can try again later" };
+        }
+        else if(payload.Template == "accepted") {
+            email.Subject = "You are a fit";
+            email.Body = new TextPart(TextFormat.Plain) { Text = "You are a fit for this role, you may likely get it so keep your fingers crossed" };
+        }
+        // send email
+        using var smtp = new SmtpClient();
+        smtp.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+        smtp.Authenticate("greyspades99@gmail.com", "ojatxgekghcfqdqi");
+        smtp.Send(email);
+        smtp.Disconnect(true);
     }
 }

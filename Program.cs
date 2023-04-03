@@ -4,6 +4,9 @@ using Microsoft.AspNetCore;
 using Recruitment.Repositories;
 using Microsoft.Extensions.FileProviders;
 using Resume.Models;
+using Cron.Handler;
+using Quartz;
+using MailConfig;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,22 @@ builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.Configure<ResumeDbSettings>(
     builder.Configuration.GetSection("ResumeDatabase"));
 
+// builder.Services.AddQuartz(q =>
+// {
+//     q.UseMicrosoftDependencyInjectionJobFactory();
+//     var jobKey = new JobKey("Contract-renewal");
+//     q.AddJob<LasmService>(opts => opts.WithIdentity(jobKey));
+
+//     q.AddTrigger(opts => opts
+//         .ForJob(jobKey)
+//         .WithIdentity("contract-trigger")
+//         .WithCronSchedule("*/25 * * * * ?"));
+
+// });
+
+// builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
 
 if(builder.Environment.IsDevelopment()) {
     builder.Services.AddCors(options =>

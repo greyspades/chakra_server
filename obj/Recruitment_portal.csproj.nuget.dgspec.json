@@ -56,6 +56,10 @@
               "target": "Package",
               "version": "[3.3.2, )"
             },
+            "MailKit": {
+              "target": "Package",
+              "version": "[3.6.0, )"
+            },
             "Microsoft.AspNetCore.Mvc.NewtonsoftJson": {
               "target": "Package",
               "version": "[7.0.3, )"
@@ -84,9 +88,25 @@
               "target": "Package",
               "version": "[1.2.3.2, )"
             },
+            "NETCore.Encrypt": {
+              "target": "Package",
+              "version": "[2.1.1, )"
+            },
             "PdfSharp": {
               "target": "Package",
               "version": "[1.50.5147, )"
+            },
+            "Quartz": {
+              "target": "Package",
+              "version": "[3.6.2, )"
+            },
+            "Quartz.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[3.6.2, )"
+            },
+            "Sgbj.Cron.CronTimer": {
+              "target": "Package",
+              "version": "[1.0.2, )"
             },
             "Sovren.SDK": {
               "target": "Package",
