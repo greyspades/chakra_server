@@ -6,6 +6,10 @@ using Microsoft.Extensions.FileProviders;
 using Resume.Models;
 using Cron.Handler;
 using Quartz;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,20 +25,50 @@ builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.Configure<ResumeDbSettings>(
     builder.Configuration.GetSection("ResumeDatabase"));
 
-// builder.Services.AddQuartz(q =>
-// {
-//     q.UseMicrosoftDependencyInjectionJobFactory();
-//     var jobKey = new JobKey("Contract-renewal");
-//     q.AddJob<LasmService>(opts => opts.WithIdentity(jobKey));
+var Configuration = builder.Configuration;
 
-//     q.AddTrigger(opts => opts
-//         .ForJob(jobKey)
-//         .WithIdentity("contract-trigger")
-//         .WithCronSchedule("*/25 * * * * ?"));
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+    var jobKey = new JobKey("Contract");
+    q.AddJob<LasmService>(opts => opts.WithIdentity(jobKey));
 
-// });
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("renewal")
+        // .WithCronSchedule("* */5 * * * ?"))
+        .WithSimpleSchedule(a => a.WithIntervalInMinutes(28).RepeatForever()));
+});
 
-// builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        options.SlidingExpiration = true;
+        options.Cookie.Name = "cookieAuth";
+        options.Cookie.SameSite = SameSiteMode.None; //TODO is this important?
+        options.Cookie.HttpOnly = false;
+        // options.ExpireTimeSpan = TimeSpan.FromDays(1);
+        options.SlidingExpiration = true;
+        options.LoginPath = "/api/Candidate/signin";
+        options.LogoutPath = "/api/User/logout";
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    });
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed(hostName => true);
+        });
+});
 
 
 if(builder.Environment.IsDevelopment()) {
@@ -43,43 +77,57 @@ if(builder.Environment.IsDevelopment()) {
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.AllowAnyOrigin()
+            policy
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed(hostName => true);
         });
 });
 }
+
+        var cookiePolicyOptions = new CookiePolicyOptions
+        {
+            MinimumSameSitePolicy = SameSiteMode.Lax,
+            // HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
+            Secure = CookieSecurePolicy.None,
+        };
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseCookiePolicy();
+    app.UseAuthorization();
+    app.UseAuthentication();
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapControllers();
 }
+app.UseCors(); 
 
-app.MapControllers();
+app.UseCookiePolicy();
 
-app.UseCors(options => options.AllowAnyOrigin()); 
+app.UseAuthorization();
+
+app.UseAuthentication();
+
 
 app.UseStaticFiles(new StaticFileOptions()
         {
             ServeUnknownFileTypes = true,
             OnPrepareResponse = ctx => {
             ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-                
-                // ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-                // ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", 
-                //   "Origin, X-Requested-With, Content-Type, Accept");
             },
 
         });
 
-app.UseHttpsRedirection();
+// app.MapRazorPages();
 
-app.UseAuthorization();
+app.MapDefaultControllerRoute();
+
+app.UseHttpsRedirection();
 
 app.MapControllers();
 

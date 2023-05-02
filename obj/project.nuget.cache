@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "OxEHY3jHLom3JderQkq/uFHXovThiVntYkDwMfVRhh3qfLQ3tm6fKmKnZ5IBUNb2LW0m6WzqfWQs2wI4PeprGg==",
+  "dgSpecHash": "uu47nqA3ng5t/WFzlIeMqLbhRVJ4TGxUU7U3zXwIGagLTMiIJaWm+J+iLgyN9wrtV1hUW+wDvcwYzVQv1kHwKg==",
   "success": true,
   "projectFilePath": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\Recruitment_portal.csproj",
   "expectedPackageFiles": [
@@ -9,6 +9,7 @@
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\awssdk.securitytoken\\3.7.100.14\\awssdk.securitytoken.3.7.100.14.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",
+    "C:\\Users\\LAPO Mfb\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\cronos\\0.7.1\\cronos.0.7.1.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
@@ -32,6 +33,7 @@
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\fluentmigrator.runner.sqlserver\\3.3.2\\fluentmigrator.runner.sqlserver.3.3.2.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\fluentmigrator.runner.sqlserverce\\3.3.2\\fluentmigrator.runner.sqlserverce.3.3.2.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\mailkit\\3.6.0\\mailkit.3.6.0.nupkg.sha512",
+    "C:\\Users\\LAPO Mfb\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\7.0.4\\microsoft.aspnetcore.authentication.jwtbearer.7.0.4.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\microsoft.aspnetcore.jsonpatch\\7.0.3\\microsoft.aspnetcore.jsonpatch.7.0.3.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\microsoft.aspnetcore.mvc.newtonsoftjson\\7.0.3\\microsoft.aspnetcore.mvc.newtonsoftjson.7.0.3.nupkg.sha512",
     "C:\\Users\\LAPO Mfb\\.nuget\\packages\\microsoft.aspnetcore.nodeservices\\3.1.32\\microsoft.aspnetcore.nodeservices.3.1.32.nupkg.sha512",

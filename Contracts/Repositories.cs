@@ -12,13 +12,25 @@ using Sovren.Models;
 using Sovren.Models.API.Parsing;
 using MongoDB.Driver;
 using AsposeDoc = global::Aspose.Words;
-using MongoDB.Driver.Core.WireProtocol.Messages;
-using Org.BouncyCastle.Crypto;
-using Quartz.Impl.Matchers;
 using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit.Text;
+using Quartz.Impl.Matchers;
+using Credentials.Models;
+using System.Text.Json;
+using System.Text;
+using System.Text.Json.Nodes;
+using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Localization;
+using AES;
+using HTML;
+using CredentialsHandler;
+using System.Net.Mime;
+using Meetings.Models;
+using Roles.Models;
+using System.Collections;
+using System.Security.Policy;
 
 namespace Recruitment.Repositories;
 public class CandidateRepository : ICandidateRepository
@@ -54,7 +66,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone, experience, cvpath, cvextension, education, gender, otherName) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplDate, @Password, @Phone, @Experience, @CvPath, @CvExtension, @Education, @Gender, @OtherName)", payload);
+        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone, experience, cvpath, cvextension, education, gender, otherName, coverletter, jobname) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplDate, @Password, @Phone, @Experience, @CvPath, @CvExtension, @Education, @Gender, @OtherName, @CoverLetter, @JobName)", payload);
 
         for (int i = 0; i < payload?.Skills.Count; i++)
         {
@@ -102,13 +114,41 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
-    public async Task<IEnumerable<CandidateModel>> CheckEmail(CandidateModel payload)
+    public async Task<string> HireCandidate(HireDto payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email AND roleid = @RoleId", payload);
+        var currentId = await connection.QueryAsync<string>("SELECT currentid from tempid WHERE id = '100'");
+
+        var summation = int.Parse(currentId.FirstOrDefault()!) + 1;
+
+        var tempId = summation.ToString().PadLeft(5, '0');
+
+        Console.WriteLine(tempId);
+
+        await connection.ExecuteAsync("UPDATE candidates SET tempid = @TempId WHERE id = @Id", new { Id = payload.Id, TempId = tempId });
+
+        await connection.ExecuteAsync("UPDATE tempid SET currentid = @TempId WHERE id = '100'", new { TempId = tempId });
+
+        await connection.ExecuteAsync("UPDATE candidates SET status = 'Hired' WHERE id = @Id", payload);
+
+        return $"TSN{tempId}";
+    }
+    public async Task<IEnumerable<BasicInfo>> CheckEmail(BasicInfo payload)
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<BasicInfo>("SELECT * from basicinfo WHERE email = @Email", payload);
 
         return data;
+    }
+    public async Task<CredentialsObj> GetCredentials()
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<CredentialsObj>("SELECT token, aeskey, aesiv FROM tokens WHERE id = '100'");
+
+        return data.First();
     }
     public async Task<string> CancelApplication(CancelApplication payload)
     {
@@ -126,11 +166,11 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
-    public async Task<IEnumerable<CandidateModel>> GetStatus(GetStatus payload)
+    public async Task<IEnumerable<CandidateModel>> GetStatus(GetStatusDto payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email and password = @Password", payload);
+        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email", payload);
 
         return data;
     }
@@ -167,6 +207,14 @@ public class CandidateRepository : ICandidateRepository
         }
 
         return fileData;
+    }
+    public async Task<IEnumerable<CandidateModel>> CheckCandidate(CandidateModel payload)
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email and roleid = @RoleId", payload);
+
+        return data;
     }
 
     public async Task<byte[]> GetBytes(IFormFile formFile)
@@ -231,25 +279,435 @@ public class CandidateRepository : ICandidateRepository
             return e.Message;
         }
     }
-
-    public void SendMail(EmailDto payload)
+    public async Task<MeetingDto> CreateMeeting(MeetingDto payload)
     {
-        var email = new MimeMessage();
-        email.From.Add(MailboxAddress.Parse("greyspades99@gmail.com"));
-        email.To.Add(MailboxAddress.Parse(payload.Reciever));
-        if(payload.Template == "notFit") {
-            email.Subject = "Sorry not a fit";
-            email.Body = new TextPart(TextFormat.Plain) { Text = "Sorry you arent a fit for this role, you can try again later" };
+
+        HttpClient client = new();
+
+        var token = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Ik9uaTBjaFdvUWZ5eExfbVdMVm1pVFEiLCJleHAiOjE2ODI5NTU2NDcsImlhdCI6MTY4MjM1MDg1MH0.vKkgpf31QmZjezswfZoEbWHcnkLq3j0qormI987GCdo";
+
+        client.DefaultRequestHeaders.Add("authorization", "bearer" + token);
+
+        var body = new
+        {
+            topic = payload.Topic,
+            type = 2,
+            start_time = $"{payload.Date}T{payload.Time}:00",
+            //   start_time = "2023-06-21T09:20:00",
+            duration = "45",
+            timezone = "UTC",
+            agenda = payload.Topic,
+            recurrence = new
+            {
+                type = 1,
+                repeat_interval = 1
+            },
+            settings = new
+            {
+                host_video = "true",
+                participant_video = "true",
+                join_before_host = "False",
+                mute_upon_entry = "False",
+                watermark = "true",
+                audio = "voip",
+                auto_recording = "cloud"
+            }
+        };
+        using StringContent jsonContent = new(
+            content: JsonSerializer.Serialize(body),
+                Encoding.UTF8,
+                "application/json");
+
+        using HttpResponseMessage response = await client.PostAsync("https://api.zoom.us/v2/users/me/meetings", jsonContent);
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+
+        var jObject = JObject.Parse(jsonResponse);
+
+        var data = new MeetingDto
+        {
+            Completed = "false",
+            Date = jObject.Value<string>("start_time")?.Split("T")[0],
+            Time = payload.Time,
+            MeetingId = jObject.Value<string>("id"),
+            ParticipantId = payload.ParticipantId,
+            Password = jObject.Value<string>("password"),
+            Topic = payload.Topic,
+            Link = jObject.Value<string>("join_url"),
+            Email = payload.Email,
+            FirstName = payload.FirstName,
+            JobTitle = payload.JobTitle,
+            JobId = payload.JobId,
+            LastName = payload.LastName
+        };
+
+        Console.WriteLine(data.Date);
+
+        return data;
+    }
+    public async Task StoreSessionInfo(MeetingDto payload)
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        await connection.ExecuteAsync("INSERT into meetings(meetingid, password, participantid, topic, date, time, completed, link, jobId, firstname, jobtitle, email, lastname) VALUES(@MeetingId, @Password, @ParticipantId, @Topic, @Date, @Time, @Completed, @Link, @JobId, @FirstName, @JobTitle, @Email, @LastName)", payload);
+    }
+    public async Task<string> SendMail(EmailDto payload, CredentialsObj cred)
+    {
+
+        HttpClient client = new();
+
+        client.DefaultRequestHeaders.Add("x-lapo-eve-proc", cred.Token);
+
+        var content = JsonSerializer.Serialize(payload);
+
+        var encryptedBody = AEShandler.Encrypt(content, cred.AesKey, cred.AesIv);
+
+        byte[] bytes = Convert.FromBase64String(encryptedBody);
+
+        string hexString = BitConverter.ToString(bytes).Replace("-", "").ToLower();
+
+        using MultipartFormDataContent multipartContent = new()
+        {
+            { new StringContent(hexString, Encoding.UTF8, MediaTypeNames.Text.Plain), "xPayload" }
+        };
+
+        using HttpResponseMessage response = await client.PostAsync(
+            "http://10.0.0.184:8023/sendmail-raw", multipartContent
+        );
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+
+        return jsonResponse;
+    }
+
+    public async Task<IEnumerable<dynamic>> GetJobDescription(string code)
+    {
+        HttpClient client = new();
+
+        var cred = new CredHandler(_config);
+
+        var credData = await cred.MakeContract();
+
+        var token = new
+        {
+            tk = credData?[0],
+            src = "AS-IN-D659B-e3M",
+            rl = "118",
+            us = "0C9C4760-F96C-42AF-80B0-B29B9EDEF237"
+        };
+
+        var body = new
+        {
+            xParam = "", 
+            xScope = "Self",
+            xJFCode = code
+        };
+
+        var jsonHeader = JsonSerializer.Serialize(token);
+
+        var jsonBody = JsonSerializer.Serialize(body);
+
+        var encryptedBody = AEShandler.Encrypt(jsonBody, credData?[1], credData?[2]);
+
+        var encryptedHeader = AEShandler.Encrypt(jsonHeader, credData?[1], credData?[2]);
+
+        byte[] bodyBytes = Convert.FromBase64String(encryptedBody);
+
+        byte[] bytes = Convert.FromBase64String(encryptedHeader);
+
+        string hexString = BitConverter.ToString(bytes).Replace("-", "").ToLower();
+
+        string bodyHexString = BitConverter.ToString(bodyBytes).Replace("-", "").ToLower();
+
+        using StringContent content = new(
+            content: bodyHexString,
+                Encoding.UTF8,
+                "application/json");
+
+        client.DefaultRequestHeaders.Add("x-lapo-eve-proc", hexString + credData?[0]);
+
+        using HttpResponseMessage response = await client.PostAsync("http://10.0.0.184:8015/performance/admin/retrievejobresponsibilitieslist", content);
+
+        var resData = await response.Content.ReadAsStringAsync();
+
+        Console.WriteLine(resData);
+
+        var jsonData = JObject.Parse(resData);
+
+        if (jsonData.Value<string>("status") == "200")
+        {
+            byte[] stringBytes = Convert.FromHexString(jsonData.Value<string>("data"));
+
+            string bytes64 = Convert.ToBase64String(stringBytes);
+
+            var decrypted = AEShandler.Decrypt(bytes64, credData?[1], credData?[2]);
+
+            var data = JsonSerializer.Deserialize<IEnumerable<dynamic>>(decrypted);
+
+            return data;
         }
-        else if(payload.Template == "accepted") {
-            email.Subject = "You are a fit";
-            email.Body = new TextPart(TextFormat.Plain) { Text = "You are a fit for this role, you may likely get it so keep your fingers crossed" };
+
+        return Array.Empty<IEnumerable<dynamic>>();
+    }
+
+    public async Task<IEnumerable<dynamic>> GetJobRoles()
+    {
+
+        HttpClient client = new();
+
+        var cred = new CredHandler(_config);
+
+        var credData = await cred.MakeContract();
+
+        var token = new
+        {
+            tk = credData?[0],
+            src = "AS-IN-D659B-e3M",
+            rl = "118",
+            us = "0C9C4760-F96C-42AF-80B0-B29B9EDEF237"
+        };
+
+        var jsonHeader = JsonSerializer.Serialize(token);
+
+        var encryptedHeader = AEShandler.Encrypt(jsonHeader, credData?[1], credData?[2]);
+
+        byte[] bytes = Convert.FromBase64String(encryptedHeader);
+
+        string hexString = BitConverter.ToString(bytes).Replace("-", "").ToLower();
+
+        client.DefaultRequestHeaders.Add("x-lapo-eve-proc", hexString + credData?[0]);
+
+        var default1 = "http://10.0.0.184:8015/shared/retrievejobfunctions/all/retrievejobfunctions";
+        var description = "http://10.0.0.184:8015/performance/admin/retrievejobresponsibilitieslist";
+
+        using HttpResponseMessage response = await client.GetAsync(default1);
+
+        var resData = await response.Content.ReadAsStringAsync();
+
+        var jsonData = JObject.Parse(resData);
+
+        if (jsonData.Value<string>("status") == "200")
+        {
+            byte[] stringBytes = Convert.FromHexString(jsonData.Value<string>("data"));
+
+            string bytes64 = Convert.ToBase64String(stringBytes);
+
+            var decrypted = AEShandler.Decrypt(bytes64, credData?[1], credData?[2]);
+
+            var data = JsonSerializer.Deserialize<IEnumerable<dynamic>>(decrypted);
+
+            return data;
         }
-        // send email
-        using var smtp = new SmtpClient();
-        smtp.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-        smtp.Authenticate("greyspades99@gmail.com", "ojatxgekghcfqdqi");
-        smtp.Send(email);
-        smtp.Disconnect(true);
+
+        return Array.Empty<IEnumerable<dynamic>>();
+    }
+    public async Task<IEnumerable<MeetingDto>> GetMeetings()
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<MeetingDto>("SELECT * FROM meetings WHERE completed = 'false'");
+
+        return data;
+    }
+    public async Task<IEnumerable<MeetingDto>> GetMeetingsByJob(string id)
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<MeetingDto>("SELECT * FROM meetings WHERE completed = 'false' AND jobid = @Id", new { Id = id });
+
+        return data;
+    }
+
+    public async Task<IEnumerable<MeetingDto>> GetMeeting(MeetingDto payload)
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<MeetingDto>("SELECT * from meetings WHERE time = @Time AND date = @Date", payload);
+
+        return data;
+    }
+
+    public async Task<IEnumerable<CandidateModel>> GetCandidateByStage(StageDto payload)
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        IEnumerable<CandidateModel>? data = null;
+
+        if (payload.RoleId == "All")
+        {
+            data = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE stage = @Stage", payload);
+        }
+        else
+        {
+            data = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE stage = @Stage AND roleid = @RoleId", payload);
+        }
+
+        return data;
+    }
+
+    public async Task<dynamic> GetMetrics()
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var finalists = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE stage = '3'");
+
+        var applications = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates");
+
+        var jobRoles = await connection.QueryAsync<RoleModel>("SELECT * FROM roles");
+
+        var hired = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE status = 'Hired'");
+
+        var result = new
+        {
+            finalists = finalists.Count(),
+            applications = applications.Count(),
+            jobRoles = jobRoles.Count(),
+            hired = hired.Count()
+        };
+
+        return result;
+    }
+
+    public async Task<IEnumerable<RoleModel>> GetJobByCode(string code)
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<RoleModel>("SELECT * FROM roles WHERE code = @Code", new { Code = code });
+
+        return data;
+    }
+
+    public async Task<dynamic> CreateUser(BasicInfo payload)
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.ExecuteAsync("INSERT INTO basicInfo(firstname, lastname, othername, phone, email, dob, password, address, gender, maritalstatus, id) VALUES (@FirstName, @LastName, @OtherName, @Phone, @Email, @Dob, @Password, @Address, @Gender, @MaritalStatus, @Id)", payload);
+
+        return data;
+    }
+
+    public async Task<IEnumerable<BasicInfo>> GetBasicInfo(string email)
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<BasicInfo>("SELECT * FROM basicinfo WHERE email = @Email", new { Email = email });
+
+        return data;
+
+    }
+    public async Task<dynamic> AdminAuth(AdminDto payload)
+    {
+
+        HttpClient client = new();
+
+        var cred = new CredHandler(_config);
+
+        var credData = await cred.MakeContract();
+
+        // Console.Write(credData?[0]);
+
+        var token = new
+        {
+            tk = credData?[0],
+            src = "AS-IN-D659B-e3M",
+        };
+
+        var body = new
+        {
+            UsN = payload.Id,
+            Pwd = payload.Password,
+            xAppSource = "AS-IN-D659B-e3M"
+        };
+
+        var jsonBody = JsonSerializer.Serialize(body);
+
+        var encryptedBody = AEShandler.Encrypt(jsonBody, credData?[1], credData?[2]);
+
+        byte[] bodyBytes = Convert.FromBase64String(encryptedBody);
+
+        string bodyHexString = BitConverter.ToString(bodyBytes).Replace("-", "").ToLower();
+
+        var jsonHeader = JsonSerializer.Serialize(token);
+
+        var encryptedHeader = AEShandler.Encrypt(jsonHeader, credData?[1], credData?[2]);
+
+        byte[] bytes = Convert.FromBase64String(encryptedHeader);
+
+        string hexString = BitConverter.ToString(bytes).Replace("-", "").ToLower();
+
+        using StringContent jsonContent = new(
+        bodyHexString,
+        Encoding.UTF8,
+        "application/json");
+
+        client.DefaultRequestHeaders.Add("x-lapo-eve-proc", hexString + credData?[0]);
+
+        using HttpResponseMessage response = await client.PostAsync("http://10.0.0.184:8015/userservices/mobile/authenticatem", jsonContent);
+
+        var resData = await response.Content.ReadAsStringAsync();
+
+        // Console.WriteLine(resData);
+
+        var jsonData = JObject.Parse(resData);
+
+        if (jsonData.Value<string>("status") == "200")
+        {
+            byte[] stringBytes = Convert.FromHexString(jsonData.Value<string>("data"));
+
+            string bytes64 = Convert.ToBase64String(stringBytes);
+
+            var decrypted = AEShandler.Decrypt(bytes64, credData?[1], credData?[2]);
+
+            var data = JsonSerializer.Deserialize<dynamic>(decrypted);
+
+            var res = new
+            {
+                code = 200,
+                message = "Successful",
+                data
+            };
+
+            return res;
+        }
+        else if (jsonData.Value<string>("status") != "200")
+        {
+            Console.WriteLine("something went wrong");
+            var res = new
+            {
+                code = 400,
+                message = jsonData.Value<string>("message_description"),
+            };
+            return res;
+        }
+
+        return Array.Empty<IEnumerable<dynamic>>();
+    }
+
+    public async Task<IEnumerable<CandidateModel>> GetCandidateByMail(string mail)
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE email = @Email", new { Email = mail });
+
+        return data;
+    }
+
+    public async Task<int> ConfirmEmail(string email) {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.ExecuteAsync("UPDATE basicinfo SET emailValid = 'True' WHERE email = @Email", new { Email = email});
+
+        return data;
+
     }
 }

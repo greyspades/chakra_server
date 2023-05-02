@@ -2,56 +2,78 @@ using Candidate.Models;
 using AES;
 using Microsoft.Data.SqlClient;
 using Dapper;
+using Credentials.Models;
+using Newtonsoft.Json.Linq;
 
 namespace CredentialsHandler;
 
-public class Credentials {
-    public static string defaultToken { get; set; } = "c4307a90c6fe0ee9a5a65c5c491b096303afc9885059df0c5844d9692497bdb38981c5d78951725f008d7a846aa0e3a0594fceed2c44c371047ffcaf5b4ca359";
-    public static string defaultKey { get; set; } = "ci.@!_^^2!auaa!h0!)4a2h!1a^1(_r!";
-    public static string defaultIv { get; set; } = ".1_r@l__3_7_)n!(";
+public class CredHandler {
     public static string id { get; set; } = "72203447f8292549e12680877545";
-
-    public static string? token { get; set; }
-
-    public static string? key { get; set; }
-
-    public static string? iv { get; set; }
     private readonly IConfiguration _config;
-    public Credentials(IConfiguration config)
+    public CredHandler(IConfiguration config)
     {
         this._config = config;
     }
 
+    public async Task<dynamic> MakeContract() {
+
+        HttpClient client = new();
+        
+            using HttpResponseMessage response = await client.GetAsync("http://10.0.0.184:8015/03a3b2c6f7d8e1c4_0a");
+
+            var credentials = "";
+
+            if(response.Headers.TryGetValues("x-lapo-eve-proc", out IEnumerable<string> resHeaders)) {
+                credentials = resHeaders.FirstOrDefault();
+            }
+
+            return credentials.Split("~");
+    }
+
     public async Task Renew() {
             try {
-                HttpClient client = new();
-        
-            client.DefaultRequestHeaders.Add("x-lapo-eve-proc", defaultToken + id);
+            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             
-            Console.WriteLine(client.DefaultRequestHeaders);
+            HttpClient client = new();
+
+            var credentials = await connection.QueryAsync<CredentialsObj>("SELECT token, aeskey, aesiv FROM tokens WHERE id = '100'");
+
+            var token = credentials.FirstOrDefault().Token;
+
+            var aesKey = credentials.FirstOrDefault().AesKey;
+
+            var aesIv = credentials.FirstOrDefault().AesIv;
+
+            client.DefaultRequestHeaders.Add("x-lapo-eve-proc", token + id);
 
             using HttpResponseMessage response = await client.GetAsync("http://10.0.0.184:8023/generateuserkey");
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine(jsonResponse);
+            using StreamWriter outputFile = new("C:/Users/LAPO Mfb/Desktop/tokenlogs/cred.txt", true);
 
-            using StreamWriter outputFile = new("C:/Users/LAPO Mfb/Desktop/tokenlogs/cred.txt");
             await outputFile.WriteAsync(jsonResponse);
 
-            byte[] stringBytes = Convert.FromHexString(jsonResponse);
+            var jsonObject = JObject.Parse(jsonResponse);
+
+            byte[] stringBytes = Convert.FromHexString(jsonObject.Value<string>("data"));
 
             string bytes64 = Convert.ToBase64String(stringBytes);
 
-            var decrypted = AEShandler.Decrypt(bytes64, defaultKey, defaultIv);
+            var decrypted = AEShandler.Decrypt(bytes64, aesKey, aesIv);
 
-            Console.WriteLine(decrypted);
+            var decryptedJson = JObject.Parse(decrypted);
 
-            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            var cred = new CredentialsObj {
+                AesIv = decryptedJson.Value<string>("aesIv"),
+                AesKey = decryptedJson.Value<string>("aesKey"),
+                Token = decryptedJson.Value<string>("access_token"),
+            };
 
-            var data = await connection.ExecuteAsync("UPDATE tokens SET token = '3296r734r' WHERE id = '100'");
-            Console.WriteLine(data);
-
+            if(cred != null) {
+                Console.WriteLine("got the credentials");
+                await connection.ExecuteAsync("UPDATE tokens SET token = @Token, aeskey = @AesKey, aesiv = @AesIv WHERE id = '100'", cred);
+            }
         }
             catch(Exception e) {
                 Console.WriteLine(e.Message);

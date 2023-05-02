@@ -130,3 +130,5 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Quartz.Extensi
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\MailKit.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\MimeKit.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\BouncyCastle.Crypto.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\BCrypt.Net-Next.dll

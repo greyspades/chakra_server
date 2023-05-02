@@ -17,10 +17,12 @@ public class RoleController : ControllerBase
     Guid guid = Guid.NewGuid();
     private readonly IConfiguration _config;
     private readonly ILogger _logger;
-    public RoleController(IConfiguration config, ILogger<dynamic> logger)
+    private readonly ICandidateRepository _repo;
+    public RoleController(IConfiguration config, ILogger<dynamic> logger, ICandidateRepository repo)
     {
         this._config = config;
         this._logger = logger;
+        this._repo = repo;
     }
 
     // [EnableCors("Policy1")]
@@ -48,16 +50,25 @@ public class RoleController : ControllerBase
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             payload.Id = guid.ToString();
-            // Debug.WriteLine(payload);
-            // Console.WriteLine(payload);
-            _logger.LogInformation(payload.Name);
-            var data = await connection.ExecuteAsync("INSERT into Roles(id, name, description, experience, deadline, unit) VALUES (@Id, @Name, @Description, @Experience, @Deadline, @Unit)", payload);
+
+            var duplicate = await connection.QueryAsync<RoleModel>("SELECT * FROM roles WHERE code = @Code", payload);
+
+            if(!duplicate.Any()) {
+                var data = await connection.ExecuteAsync("INSERT into Roles(id, name, description, experience, deadline, unit, code, status) VALUES (@Id, @Name, @Description, @Experience, @Deadline, @Unit, @Code, @Status)", payload);
+            }
+
+            else {
+                return Ok(new
+            {
+                code = 501,
+                message = "This job is already active",
+            });
+            }
 
             var response = new
             {
                 code = 200,
                 message = "Successfully added new Role",
-                data
             };
 
 
@@ -136,4 +147,94 @@ public class RoleController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpGet("jobs/{page}/{take}")]
+    public async Task<ActionResult<string>> GetJobs(int page, int take) {
+        try {
+            var data = await _repo.GetJobRoles();
+
+            // var take = 10;
+
+            var count = page * 10;
+            
+            var slicedCandidates = data.Skip(count).Take(take);
+
+            var response = new {
+                code = 200,
+                message = "Successful",
+                count = data.Count(),
+                data = slicedCandidates
+            };
+
+            return Ok(response);
+        }
+        catch(Exception e) {
+            Console.WriteLine(e.Message);
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [HttpGet("code/{code}")]
+    public async Task<ActionResult> GetJobByCode(string code) {
+        try {
+            var data = await _repo.GetJobByCode(code);
+
+            return Ok(data);
+        }
+        catch(Exception e){
+            Console.WriteLine(e.Message);
+
+            var response = new {
+                code = 500,
+                message = "Unnable to process your request"
+            };
+
+            return StatusCode(500, response);
+        }
+    }
+
+    
+    [HttpGet("description/{code}")]
+    public async Task<ActionResult> GetJobDescription(string code) {
+        try {
+            var data = await _repo.GetJobDescription(code);
+
+            return Ok(data);
+        }
+        catch(Exception e){
+            Console.WriteLine(e.Message);
+
+            var response = new {
+                code = 500,
+                message = "Unnable to process your request"
+            };
+
+            return StatusCode(500, response);
+        }
+    }
+    
+    [HttpGet("search/{value}")]
+    public async Task<ActionResult> SearchJob(string value) {
+        try {
+            
+            var data = await _repo.GetJobRoles();
+
+            var dataList = data.ToList();
+
+            var result = dataList.Find((item) => item.Item.Contains(value));
+
+            return Ok(result);
+        }
+        catch(Exception e){
+            Console.WriteLine(e.Message);
+
+            var response = new {
+                code = 500,
+                message = "Unnable to process your request"
+            };
+
+            return StatusCode(500, response);
+        }
+    }
+
 }

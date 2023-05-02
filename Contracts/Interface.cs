@@ -4,6 +4,8 @@ using System;
 using Microsoft.AspNetCore.Mvc;
 using Candidate.Models;
 using Roles.Models;
+using Credentials.Models;
+using Meetings.Models;
 
 namespace Recruitment.Interface
 {
@@ -16,8 +18,8 @@ namespace Recruitment.Interface
        public Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string id);
        public Task<string> UpdateStage(UpdateRole payload);
        public Task<string> CancelApplication(CancelApplication id);
-       public Task<IEnumerable<CandidateModel>> GetStatus(GetStatus payload);
-       public Task<IEnumerable<CandidateModel>> CheckEmail(CandidateModel payload);
+       public Task<IEnumerable<CandidateModel>> GetStatus(GetStatusDto payload);
+       public Task<IEnumerable<BasicInfo>> CheckEmail(BasicInfo payload);
        public Task<dynamic> ParseCvAsync(IFormFile formFile, Guid id);
        public Task<dynamic> ParseCvData(IFormFile cv);
        public Task<byte[]> GetBytes(IFormFile formFile);
@@ -25,7 +27,26 @@ namespace Recruitment.Interface
        public Task<IEnumerable<string>> GetCandidateBySkills(SkillsInput payload);
        public Task<string> FlagCandidate(FlagCandidateDto payload);
        public Task<IEnumerable<CandidateModel>> GetByFlag(CandidateByFlagDto payload);
-       public void SendMail(EmailDto payload);
+      //  public void SendMail(EmailDto payload);
+       public Task<string> HireCandidate(HireDto payload);
+       public Task<CredentialsObj> GetCredentials();
+       public Task<MeetingDto> CreateMeeting(MeetingDto payload);
+       public Task<string> SendMail(EmailDto payload, CredentialsObj cred);
+       public Task StoreSessionInfo(MeetingDto payload);
+       public Task<IEnumerable<dynamic>> GetJobRoles();
+       public Task<IEnumerable<MeetingDto>> GetMeetings();
+       public Task<IEnumerable<CandidateModel>> CheckCandidate(CandidateModel payload);
+       public Task<IEnumerable<MeetingDto>> GetMeetingsByJob(string id);
+       public Task<IEnumerable<MeetingDto>> GetMeeting(MeetingDto payload);
+       public Task<IEnumerable<CandidateModel>> GetCandidateByStage(StageDto payload);
+       public Task<dynamic> GetMetrics();
+       public Task<IEnumerable<RoleModel>> GetJobByCode(string code);
+       public Task<dynamic> CreateUser (BasicInfo payload);
+       public Task<IEnumerable<BasicInfo>> GetBasicInfo(string email);
+       public Task<dynamic> AdminAuth(AdminDto payload);
+       public Task<IEnumerable<CandidateModel>> GetCandidateByMail(string mail);
+       public Task<int> ConfirmEmail(string email);
+       public Task<IEnumerable<dynamic>> GetJobDescription(string code);
     }
 
    public interface IRolesRepository
