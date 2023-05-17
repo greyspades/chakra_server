@@ -84,6 +84,10 @@
               "target": "Package",
               "version": "[5.1.0, )"
             },
+            "Microsoft.Graph": {
+              "target": "Package",
+              "version": "[5.10.0, )"
+            },
             "MongoDB.Driver": {
               "target": "Package",
               "version": "[2.19.0, )"

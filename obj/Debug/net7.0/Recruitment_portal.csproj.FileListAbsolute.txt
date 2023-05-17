@@ -132,3 +132,12 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\MimeKit.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\BouncyCastle.Crypto.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\BCrypt.Net-Next.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Graph.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Graph.Core.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Kiota.Abstractions.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Kiota.Authentication.Azure.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Kiota.Http.HttpClientLibrary.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Kiota.Serialization.Form.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Kiota.Serialization.Json.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Kiota.Serialization.Text.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Tavis.UriTemplates.dll

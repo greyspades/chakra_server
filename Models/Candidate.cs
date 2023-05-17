@@ -119,8 +119,6 @@ public class GetStatusDto {
     [Required]
     [EmailAddress(ErrorMessage = "Not a valid Email Address")]
     public string? Email { get; set; }
-    [Required]
-    public string? Password { get; set; }
 }
 
 public class UpdateRole {
@@ -164,4 +162,12 @@ public class StageDto {
 public class AdminDto {
     public string? Id { get; set; }
     public string? Password { get; set; }
+}
+
+public class CommentDto {
+    public string? Id { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public DateTime? Date { get; set; }
+    public string? Comment { get; set; }
 }

@@ -31,6 +31,9 @@ using Meetings.Models;
 using Roles.Models;
 using System.Collections;
 using System.Security.Policy;
+using Azure.Identity;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
 
 namespace Recruitment.Repositories;
 public class CandidateRepository : ICandidateRepository
@@ -66,7 +69,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone, experience, cvpath, cvextension, education, gender, otherName, coverletter, jobname) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplDate, @Password, @Phone, @Experience, @CvPath, @CvExtension, @Education, @Gender, @OtherName, @CoverLetter, @JobName)", payload);
+        _ = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone, experience, cvpath, cvextension, education, gender, otherName, coverletter, jobname) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplDate, @Password, @Phone, @Experience, @CvPath, @CvExtension, @Education, @Gender, @OtherName, @CoverLetter, @JobName)", payload);
 
         for (int i = 0; i < payload?.Skills.Count; i++)
         {
@@ -284,7 +287,7 @@ public class CandidateRepository : ICandidateRepository
 
         HttpClient client = new();
 
-        var token = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Ik9uaTBjaFdvUWZ5eExfbVdMVm1pVFEiLCJleHAiOjE2ODI5NTU2NDcsImlhdCI6MTY4MjM1MDg1MH0.vKkgpf31QmZjezswfZoEbWHcnkLq3j0qormI987GCdo";
+        var token = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Ik9uaTBjaFdvUWZ5eExfbVdMVm1pVFEiLCJleHAiOjE3MzU1NzcxMDAsImlhdCI6MTY4MzUzNjM3OX0.JevQmwj0ZRvR_vmdd_yQNmKZN9Sz47U3LQ85RjiOHpM";
 
         client.DefaultRequestHeaders.Add("authorization", "bearer" + token);
 
@@ -427,11 +430,9 @@ public class CandidateRepository : ICandidateRepository
 
         client.DefaultRequestHeaders.Add("x-lapo-eve-proc", hexString + credData?[0]);
 
-        using HttpResponseMessage response = await client.PostAsync("http://10.0.0.184:8015/performance/admin/retrievejobresponsibilitieslist", content);
+        using HttpResponseMessage response = await client.PostAsync("http://10.0.0.184:8015/performance/retrievejobresponsibilitieslist", content);
 
         var resData = await response.Content.ReadAsStringAsync();
-
-        Console.WriteLine(resData);
 
         var jsonData = JObject.Parse(resData);
 
@@ -495,12 +496,12 @@ public class CandidateRepository : ICandidateRepository
 
             var decrypted = AEShandler.Decrypt(bytes64, credData?[1], credData?[2]);
 
-            var data = JsonSerializer.Deserialize<IEnumerable<dynamic>>(decrypted);
+            var data = JsonSerializer.Deserialize<IEnumerable<Job>>(decrypted);
 
             return data;
         }
 
-        return Array.Empty<IEnumerable<dynamic>>();
+        return Array.Empty<IEnumerable<Job>>();
     }
     public async Task<IEnumerable<MeetingDto>> GetMeetings()
     {
@@ -693,7 +694,7 @@ public class CandidateRepository : ICandidateRepository
 
     public async Task<IEnumerable<CandidateModel>> GetCandidateByMail(string mail)
     {
-
+        Console.Write(mail);
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         var data = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE email = @Email", new { Email = mail });
@@ -709,5 +710,59 @@ public class CandidateRepository : ICandidateRepository
 
         return data;
 
+    }
+    public async Task CreateComment(CommentDto payload) {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        await connection.ExecuteAsync("INSERT INTO comments(id, firstname, lastname, date, comment) VALUES (@Id, @Firstname, @Lastname, @Date, @Comment)", payload);
+    }
+
+    public async Task<IEnumerable<CommentDto>> GetComments(string id) {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<CommentDto>("SELECT * FROM comments WHERE id = @Id", new { Id = id});
+
+        return data;
+    }
+
+    public async Task<dynamic> CreateTeamsMeeting() {
+                    // The client credentials flow requires that you request the
+            // /.default scope, and preconfigure your permissions on the
+            // app registration in Azure. An administrator must grant consent
+            // to those permissions beforehand.
+            var scopes = new[] { "https://graph.microsoft.com/.default" };
+
+            // Multi-tenant apps can use "common",
+            // single-tenant apps must use the tenant ID from the Azure portal
+            var tenantId = "68a4b2bf-c074-44b7-822c-3e8a14cbac6d";
+
+            // Values from app registration
+            var clientId = "14ad88f5-387e-41f8-93aa-2f737d6994ec";
+            var clientSecret = "4NY8Q~ky5oVxRXqjyZ9hOPZBY~9y22EHIXCQNaOf";
+
+            // using Azure.Identity;
+            var options = new TokenCredentialOptions
+            {
+                AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
+            };
+
+            // https://learn.microsoft.com/dotnet/api/azure.identity.clientsecretcredential
+            var clientSecretCredential = new ClientSecretCredential(
+                tenantId, clientId, clientSecret, options);
+
+            var graphClient = new GraphServiceClient(clientSecretCredential, scopes);
+
+            var requestBody = new OnlineMeeting
+            {
+                StartDateTime = DateTimeOffset.Parse("2023-05-16T15:05:34.2444915-07:00"),
+                EndDateTime = DateTimeOffset.Parse("2023-05-16T15:20:34.2464912-07:00"),
+                Subject = "User Token Meeting",
+            };
+            // var result = await graphClient.Me.OnlineMeetings.PostAsync(requestBody);
+
+            // return result;
+            return graphClient;
     }
 }

@@ -7,6 +7,10 @@ using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Data;
 using System.Diagnostics;
+// using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Roles.Controller;
 
@@ -198,8 +202,23 @@ public class RoleController : ControllerBase
     public async Task<ActionResult> GetJobDescription(string code) {
         try {
             var data = await _repo.GetJobDescription(code);
+            if(data.Any()) {
+                var response = new {
+                    code = 200,
+                    message = "Successful",
+                    data
+                };
 
-            return Ok(data);
+                return Ok(response);
+            }
+            else {
+                var response = new {
+                    code = 500,
+                    message = "couldnt"
+                };
+
+                return StatusCode(500, response);
+            }
         }
         catch(Exception e){
             Console.WriteLine(e.Message);
@@ -218,10 +237,9 @@ public class RoleController : ControllerBase
         try {
             
             var data = await _repo.GetJobRoles();
+            List<Job> dataList = (List<Job>)data;
 
-            var dataList = data.ToList();
-
-            var result = dataList.Find((item) => item.Item.Contains(value));
+            var result = dataList.FindAll((item) => item.Item.ToLower().Contains(value.ToLower()));
 
             return Ok(result);
         }

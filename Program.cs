@@ -42,6 +42,11 @@ builder.Services.AddQuartz(q =>
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
+// builder.Services.AddMicrosoftIdentityWebAppAuthentication(Configuration)
+//         .EnableTokenAcquisitionToCallDownstreamApi()
+//         .AddMicrosoftGraph("https://graph.microsoft.com/beta", scopes)
+//         .AddInMemoryTokenCaches();
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {

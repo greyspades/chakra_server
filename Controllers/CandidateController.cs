@@ -17,6 +17,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Azure.Identity;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
 
 namespace Candidate.Controllers;
 
@@ -97,10 +100,12 @@ public class CandidateController : ControllerBase
             {
                 var dateDifference = (DateTime.Now.Date - payload?.Dob.Value)?.TotalDays;
 
-                var info = await _repo.GetCandidateByMail(payload?.Email);
+                var info = await _repo.GetBasicInfo(payload?.Email);
 
-                for(int i = 0; i<info.Count(); i++) {
-                    if(info.ElementAt(i).RoleId == payload.RoleId) {
+                var applications = await _repo.GetCandidateByMail(payload.Email);
+
+                for(int i = 0; i<applications.Count(); i++) {
+                    if(applications.ElementAt(i).RoleId == payload.RoleId) {
                         var response = new {
                             code = 400,
                             message = "You have already applied for this job role"
@@ -109,8 +114,7 @@ public class CandidateController : ControllerBase
                         return Ok(response);
                     }
                 }
-
-                if(payload.EmailValid != "True") {
+                if(info.First().EmailValid != "True") {
                     var response = new {
                         code = 400,
                         message = "Sorry please verify your email to continue"
@@ -118,8 +122,7 @@ public class CandidateController : ControllerBase
 
                     return Ok(response);
                 }
-
-                if (
+                if(
                     dateDifference > 6570
                 )
                 {
@@ -133,9 +136,9 @@ public class CandidateController : ControllerBase
                     payload.Stage = "1";
                     payload.Status = "Pending";
 
-                    var data = await _repo.CreateCandidate(payload!);
+                    var data = await _repo.CreateCandidate(payload);
 
-                    // CredentialsObj cred = await _repo.GetCredentials();
+                    CredentialsObj cred = await _repo.GetCredentials();
 
                     var mailObj = new EmailDto {
                         Firstname = payload.FirstName,
@@ -145,7 +148,7 @@ public class CandidateController : ControllerBase
                         Body = HTMLHelper.Acknowledgement(payload),
                     };
 
-                    // var mail = await _repo.SendMail(mailObj, cred);
+                    var mail = await _repo.SendMail(mailObj, cred);
 
                     var response = new
                     {
@@ -532,7 +535,7 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [Authorize]
+    // [Authorize]
     [HttpPost("/status")]
     public async Task<ActionResult<CandidateModel>> GetStatus(GetStatusDto payload)
     {
@@ -542,9 +545,11 @@ public class CandidateController : ControllerBase
             {
                 var info = await _repo.GetBasicInfo(payload?.Email);
 
-                if(payload.Password == info.First().Password) {
+                Console.Write(info.First().LastName);
 
+                if(info.Any()) {
                     var data = await _repo.GetStatus(payload);
+
 
                     var response = new
                 {
@@ -559,15 +564,6 @@ public class CandidateController : ControllerBase
                 {
                     code = 400,
                     message = "This Candidate does not exist, please check your email address and try again",
-
-                };
-                return Ok(response);
-                }
-                else if(payload.Password != info.First().Password) {
-                var response = new
-                {
-                    code = 400,
-                    message = "The password is incorrect, please check the password and try again",
 
                 };
                 return Ok(response);
@@ -966,6 +962,75 @@ public class CandidateController : ControllerBase
         }
         catch(Exception e) {
             Console.WriteLine(e.Message);
+            var response = new {
+                code = 500,
+                message = "Unnable to process your request"
+            };
+
+            return StatusCode(500, response);
+        }
+    }
+
+    [HttpPost("comment")]
+    public async Task<ActionResult> Comment(CommentDto payload) {
+        try {
+            payload.Date = DateTime.Now;
+
+            await _repo.CreateComment(payload);
+            
+            var response = new {
+                code = 200,
+                message = "Successful"
+            };
+
+            return Ok(response);
+        }
+        catch(Exception e) {
+            Console.Write(e.Message);
+            var response = new {
+                code = 500,
+                message = "An error occured processing this request"
+            };
+
+            return StatusCode(500, response);
+        }
+    }
+
+    [HttpGet("comments/{id}")]
+    public async Task<ActionResult> GetComments(string id) {
+        try {
+            var data = await _repo.GetComments(id);
+            
+            var response = new {
+                code = 200,
+                message = "Successful",
+                data
+            };
+
+            return Ok(response);
+        }
+        catch(Exception e) {
+            Console.Write(e.Message);
+            var response = new {
+                code = 500,
+                message = "An error occured processing this request"
+            };
+
+            return StatusCode(500, response);
+        }
+    }
+
+    [HttpPost("teamsMeeting")]
+    public async Task<ActionResult> CreateTeamsMeeting(AdminDto payload) {
+        try {
+            var data = await _repo.CreateTeamsMeeting();
+
+            Console.Write(data);
+
+            return Ok(data);
+        }
+        catch(Exception e) {
+            Console.Write(e.Message);
             var response = new {
                 code = 500,
                 message = "Unnable to process your request"

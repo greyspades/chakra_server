@@ -47,6 +47,9 @@ namespace Recruitment.Interface
        public Task<IEnumerable<CandidateModel>> GetCandidateByMail(string mail);
        public Task<int> ConfirmEmail(string email);
        public Task<IEnumerable<dynamic>> GetJobDescription(string code);
+       public Task CreateComment(CommentDto payload);
+       public Task<IEnumerable<CommentDto>> GetComments(string id);
+       public Task<dynamic> CreateTeamsMeeting();
     }
 
    public interface IRolesRepository
