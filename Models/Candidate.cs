@@ -164,6 +164,12 @@ public class AdminDto {
     public string? Password { get; set; }
 }
 
+public class GetCandidatesDto {
+    public string? Id { get; set; }
+    public int? Page { get; set; }
+    public int? Take { get; set; }
+}
+
 public class CommentDto {
     public string? Id { get; set; }
     public string? FirstName { get; set; }

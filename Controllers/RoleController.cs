@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Roles.Models;
-using Recruitment.Interface;
+using JobRole.Interface;
 using Recruitment.Context;
 using Microsoft.Data.SqlClient;
 using Dapper;
@@ -11,6 +11,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using JobRole.Interface;
 
 namespace Roles.Controller;
 
@@ -21,8 +22,8 @@ public class RoleController : ControllerBase
     Guid guid = Guid.NewGuid();
     private readonly IConfiguration _config;
     private readonly ILogger _logger;
-    private readonly ICandidateRepository _repo;
-    public RoleController(IConfiguration config, ILogger<dynamic> logger, ICandidateRepository repo)
+    private readonly IJobRoleRepository _repo;
+    public RoleController(IConfiguration config, ILogger<dynamic> logger, IJobRoleRepository repo)
     {
         this._config = config;
         this._logger = logger;
@@ -35,7 +36,7 @@ public class RoleController : ControllerBase
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<RoleModel>("SELECT * FROM Roles");
+        var data = await _repo.GetRoles();
 
         var response = new
         {
@@ -48,17 +49,18 @@ public class RoleController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> AddRole(RoleModel payload)
+    public async Task<ActionResult> AddRole(JobRoleModel payload)
     {
         try
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             payload.Id = guid.ToString();
 
-            var duplicate = await connection.QueryAsync<RoleModel>("SELECT * FROM roles WHERE code = @Code", payload);
+            var duplicate = await _repo.GetJobByCode(payload.Code);
+
 
             if(!duplicate.Any()) {
-                var data = await connection.ExecuteAsync("INSERT into Roles(id, name, description, experience, deadline, unit, code, status) VALUES (@Id, @Name, @Description, @Experience, @Deadline, @Unit, @Code, @Status)", payload);
+                await _repo.AddJobRole(payload);
             }
 
             else {
@@ -75,7 +77,6 @@ public class RoleController : ControllerBase
                 message = "Successfully added new Role",
             };
 
-
             return Ok(response);
         }
         catch (Exception e)
@@ -86,36 +87,12 @@ public class RoleController : ControllerBase
         }
     }
 
-    [HttpPost("edit")]
-    public async Task<ActionResult<RoleModel>> UpdateRole(RoleModel payload) {
-        try {
-            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var data = await connection.ExecuteAsync("UPDATE roles SET id=@Id, name=@Name, unit=@Unit, description=@Description, experience=@Experience, deadline=@Deadline WHERE id = @Id", payload);
-
-            var response = new
-            {
-                code = 200,
-                message = "Successfully Updated Role",
-                data
-            };
-
-            return Ok(response);
-        }
-        catch(Exception e) {
-            Console.WriteLine(value: e.Message);
-
-            return StatusCode(500, e.Message);
-        }
-    }
-
     [HttpGet("byId/{id}")]
-    public async Task<ActionResult<RoleModel>> GetRoleById(string id)
+    public async Task<ActionResult<JobRoleModel>> GetRoleById(string id)
     {
         try
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-
-            var data = await connection.QueryAsync("SELECT * FROM roles where id = @Id", new { Id = id });
+            var data = await _repo.GetJobRoleById(id);
 
             var response = new {
                 code = 200,
@@ -134,13 +111,11 @@ public class RoleController : ControllerBase
     }
 
     [HttpGet("byUnit/{unit}")]
-    public async Task<ActionResult<RoleModel>> GetRoleByDivision(string unit)
+    public async Task<ActionResult<JobRoleModel>> GetRoleByDivision(string unit)
     {
         try
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-
-            var data = await connection.QueryAsync("SELECT * FROM roles where unit = @Unit", new { Unit = unit });
+            var data = await _repo.GetJobRoleByUnit(unit);
 
             return Ok(data);
         }
@@ -254,5 +229,4 @@ public class RoleController : ControllerBase
             return StatusCode(500, response);
         }
     }
-
 }

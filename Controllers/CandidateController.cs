@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Candidate.Models;
-using Recruitment.Interface;
 using Microsoft.AspNetCore.Cors;
 using System.Security;
 using Microsoft.AspNetCore.StaticFiles;
@@ -20,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Azure.Identity;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Candidate.Interface;
 
 namespace Candidate.Controllers;
 
@@ -35,7 +35,7 @@ public class CandidateController : ControllerBase
     // private readonly IMongoCollection<ResumeModel> _collection;
     // private readonly IMongoDatabase _mongoDb;
     private static readonly HttpClient client = new();
-    public CandidateController(IWebHostEnvironment environment, ICandidateRepository repo, IOptions<ResumeDbSettings> dbSettings)
+    public CandidateController(IWebHostEnvironment environment, ICandidateRepository repo)
     {
         this._repo = repo;
         this._env = environment;
@@ -66,7 +66,7 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpPost]
     public async Task<ActionResult<List<CandidateModel>>> GetCandidateById(string id)
     {
         try
@@ -138,7 +138,7 @@ public class CandidateController : ControllerBase
 
                     var data = await _repo.CreateCandidate(payload);
 
-                    CredentialsObj cred = await _repo.GetCredentials();
+                    // CredentialsObj cred = await _repo.GetCredentials();
 
                     var mailObj = new EmailDto {
                         Firstname = payload.FirstName,
@@ -148,13 +148,12 @@ public class CandidateController : ControllerBase
                         Body = HTMLHelper.Acknowledgement(payload),
                     };
 
-                    var mail = await _repo.SendMail(mailObj, cred);
+                    // var mail = await _repo.SendMail(mailObj, cred);
 
                     var response = new
                     {
                         code = 200,
                         data,
-                        // mail
                     };
 
                     return Ok(response);
@@ -194,41 +193,6 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpGet("/decrypt")]
-    public async Task<ActionResult<string>> Decrypt() {
-        try {
-            var payload = "743adc8c7829d097750b445e8803eafa0111f3fce0858e8b3a8f2c5c6338ef677c0ce74403ec6583af2b5e968dd216d2f3a4e33b7bb3ed57317b4a803aecb54c4e54daf70972554ca71fa8443fa19935e23ebadfd5111b0dfd5d0f517124d88a7d93c8c0ed6d850e43bf597881cbbf58cf2e939ce04955ddda2d2a970e3824fe20714d768a89d3f17706d9b8a6e301ffa2ac167d1217055aeeaad889c0c168f19ccc30db703b728e180ec4f930d5dd581eca93abf14a1171b6bfaf299a87e3340b5e2a09694b825006483d0281c79052c4b613d42671d28cf2a1cd6aa4ff27bdf268b2c23d9922797ca54afbc6b13f02";
-            var key = "6rh@!jhrt_so93!psl.y!w_.i.n!a!??";
-            var iv = "6_q@1hv@0_o75!^s";
-
-            byte[] stringBytes = Convert.FromHexString(payload);
-
-            string res = Convert.ToBase64String(stringBytes);
-
-            var decrypted = AEShandler.Decrypt(res, key, iv);
-
-            // var jsonObject = JObject.Parse(decrypted);
-
-            Console.WriteLine(stringBytes);
-
-            Console.WriteLine(res);
-
-            Console.WriteLine(decrypted);
-
-            // Console.WriteLine(decrypted);
-
-            // var parsed = JsonSerializer.Deserialize<dynamic>(decrypted);
-
-            // Console.WriteLine(parsed.Access_Token);
-            
-            return Ok("work ooo");
-        }
-        catch(Exception e) {
-            Console.WriteLine(e.Message);
-            return StatusCode(500, e.Message);
-        }
-    }
-
     [HttpPost("mail")]
     public async Task<ActionResult<string>> SendMail(EmailDto payload)
     {
@@ -247,7 +211,7 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpGet("skills/{id}")]
+    [HttpPost("skills")]
     public async Task<ActionResult<List<string>>> GetSkills(string id)
     {
         try
@@ -459,18 +423,18 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpGet("role/{id}/{page}/{take}")]
-    public async Task<ActionResult<List<CandidateModel>>> GetCandidateByRole(string id, int page, int take)
+    [HttpGet("role")]
+    public async Task<ActionResult<List<CandidateModel>>> GetCandidateByRole(GetCandidatesDto payload)
     {
         try
         {
-            var data = await _repo.GetCandidatesByRole(id);
+            var data = await _repo.GetCandidatesByRole(payload);
 
             // var take = 10;
 
-            var count = page * 10;
+            var count = payload.Page * 10;
             
-            var slicedCandidates = data.Skip(count).Take(take);
+            var slicedCandidates = data.Skip((int)count!).Take((int)payload.Take!);
 
             var response = new
             {
@@ -480,29 +444,6 @@ public class CandidateController : ControllerBase
             };
 
             return Ok(response);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-
-            return StatusCode(500, e.Message);
-        }
-    }
-
-    [HttpPut("email")]
-    public async Task<ActionResult<List<CandidateModel>>> UpdateData(UpdateEmail payload)
-    {
-        try
-        {
-            var data = await _repo.UpdateData(payload);
-
-            var sample = new
-            {
-                code = 200,
-                message = "email updated successfully"
-            };
-
-            return Ok(sample);
         }
         catch (Exception e)
         {
@@ -592,7 +533,7 @@ public class CandidateController : ControllerBase
     }
 
 
-    [HttpGet("/resume/{id}")]
+    [HttpPost("resume")]
     public ActionResult<dynamic> GetResume(string id)
     {
         try
@@ -610,18 +551,36 @@ public class CandidateController : ControllerBase
         }
     }
 
+    [HttpGet("meetings")]
+    public async Task<ActionResult<MeetingDto>> GetMeetings()
+    {
+        try
+        {
+            var data = await _repo.GetMeetings();
+
+            var response = new {
+                code = 200,
+                message = "Success",
+                data
+            };
+
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+
+            return StatusCode(500, e.Message);
+        }
+    }
+
     [HttpPost("meeting")]
     public async Task<ActionResult> CreateMeeting(MeetingDto payload) {
         try {
             var meeting = await _repo.GetMeeting(payload);
 
-            // var today = new DateTime().
-
-
             if(!meeting.Any()) {
                       var data = await _repo.CreateMeeting(payload);
-
-            CredentialsObj cred = await _repo.GetCredentials();
 
             payload.Link = data.Link;
             payload.MeetingId = data.MeetingId;
@@ -641,8 +600,6 @@ public class CandidateController : ControllerBase
             };
 
             await _repo.UpdateStage(stageUpdate);
-
-            var mail = await _repo.SendMail(mailObj, cred);
             
             payload.Completed = "false";
 
@@ -672,32 +629,6 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpGet("meetings/{id?}")]
-    public async Task<ActionResult<List<MeetingDto>>> GetMeetings(string id = "all") {
-        try {
-            IEnumerable<MeetingDto>? data = null;
-
-            if(id == "all") {
-                data = await _repo.GetMeetings();
-            }
-            else {
-                data = await _repo.GetMeetingsByJob(id);
-            }
-
-            var response = new {
-                code = 200,
-                message = "Successfull",
-                data
-            };
-
-            return Ok(response);
-        }
-        catch(Exception e) {
-            Console.WriteLine(e.Message);
-            
-            return StatusCode(500, e.Message);
-        }
-    }
     [HttpPost("stage")]
     public async Task<ActionResult> GetCandidateByStage(StageDto payload) {
         try {
@@ -814,33 +745,33 @@ public class CandidateController : ControllerBase
 
             if(data.Any() && BC.Verify(payload.Password, data.First().Password) == true) {
 
-                //         var claims = new List<Claim>
-                // {
-                //     new Claim(ClaimTypes.Email, payload.Email),
-                //     new Claim(ClaimTypes.Name, data.First().Id),
-                //     new Claim(ClaimTypes.Role, "Administrator"),
-                // };
+                        var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Email, payload.Email),
+                    new Claim(ClaimTypes.Name, data.First().Id),
+                    new Claim(ClaimTypes.Role, "Administrator"),
+                };
 
-                // var claimsIdentity = new ClaimsIdentity(
-                //     claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsIdentity = new ClaimsIdentity(
+                    claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                // var authProperties = new AuthenticationProperties
-                // {
-                //     AllowRefresh = true,
-                //     ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
-                //     IsPersistent = true,
-                // };
+                var authProperties = new AuthenticationProperties
+                {
+                    AllowRefresh = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
+                    IsPersistent = true,
+                };
 
-                // await HttpContext.SignInAsync(
-                //     CookieAuthenticationDefaults.AuthenticationScheme, 
-                //     new ClaimsPrincipal(claimsIdentity), 
-                //     authProperties);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme, 
+                    new ClaimsPrincipal(claimsIdentity), 
+                    authProperties);
 
-                //         HttpContext.Response.Cookies.Append(
-                //       "cookieKey",
-                //       "cookieValue",
-                //       new CookieOptions { IsEssential = true }
-                //   );
+                        HttpContext.Response.Cookies.Append(
+                      "cookieKey",
+                      "cookieValue",
+                      new CookieOptions { IsEssential = true }
+                  );
                 var cookieOptions = new CookieOptions
                 {
                     Expires = DateTime.Now.AddDays(1),
@@ -912,20 +843,24 @@ public class CandidateController : ControllerBase
             return StatusCode(500, response);
         }
     }
-    [HttpGet("validate/{email}")]
+    [HttpPost("validate")]
     public async Task<ActionResult> ValidateEmail(string email) {
         try {
+            var hash = BC.HashPassword(inputKey: email);
+
+            var mail = BC.InterrogateHash(email);
+
             var user = await _repo.GetBasicInfo(email);
             
             if(user.Any()) {
                 var data = await _repo.ConfirmEmail(email);
 
-            var response = new {
-                code = 200,
-                message = "Email verified successfully",
-            };
+                var response = new {
+                    code = 200,
+                    message = "Email verified successfully",
+                };
 
-            return Ok(response);
+                return Ok(response);
             }
             else {
                 var response = new {
@@ -946,7 +881,7 @@ public class CandidateController : ControllerBase
             return StatusCode(500, response);
         }
     }
-    [HttpGet("signout")]
+    [HttpPost("signout")]
     public async Task<ActionResult> SignUserOut()
     {
         try {
@@ -996,7 +931,7 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpGet("comments/{id}")]
+    [HttpPost("comments")]
     public async Task<ActionResult> GetComments(string id) {
         try {
             var data = await _repo.GetComments(id);
@@ -1025,12 +960,10 @@ public class CandidateController : ControllerBase
         try {
             var data = await _repo.CreateTeamsMeeting();
 
-            Console.Write(data);
-
             return Ok(data);
         }
         catch(Exception e) {
-            Console.Write(e.Message);
+            Console.WriteLine(e.Message);
             var response = new {
                 code = 500,
                 message = "Unnable to process your request"

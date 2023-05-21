@@ -7,7 +7,7 @@ using Roles.Models;
 using Credentials.Models;
 using Meetings.Models;
 
-namespace Recruitment.Interface
+namespace Candidate.Interface
 {
    public interface ICandidateRepository
    {
@@ -15,7 +15,7 @@ namespace Recruitment.Interface
        public Task<IEnumerable<CandidateModel>> GetCandidateById(string Id);
        public Task<string> CreateCandidate(CandidateModel payload);
        public Task<string> UpdateData(UpdateEmail payload);
-       public Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string id);
+       public Task<IEnumerable<CandidateModel>> GetCandidatesByRole(GetCandidatesDto payload);
        public Task<string> UpdateStage(UpdateRole payload);
        public Task<string> CancelApplication(CancelApplication id);
        public Task<IEnumerable<CandidateModel>> GetStatus(GetStatusDto payload);
@@ -27,36 +27,24 @@ namespace Recruitment.Interface
        public Task<IEnumerable<string>> GetCandidateBySkills(SkillsInput payload);
        public Task<string> FlagCandidate(FlagCandidateDto payload);
        public Task<IEnumerable<CandidateModel>> GetByFlag(CandidateByFlagDto payload);
-      //  public void SendMail(EmailDto payload);
        public Task<string> HireCandidate(HireDto payload);
        public Task<CredentialsObj> GetCredentials();
        public Task<MeetingDto> CreateMeeting(MeetingDto payload);
        public Task<string> SendMail(EmailDto payload, CredentialsObj cred);
        public Task StoreSessionInfo(MeetingDto payload);
-       public Task<IEnumerable<dynamic>> GetJobRoles();
        public Task<IEnumerable<MeetingDto>> GetMeetings();
        public Task<IEnumerable<CandidateModel>> CheckCandidate(CandidateModel payload);
-       public Task<IEnumerable<MeetingDto>> GetMeetingsByJob(string id);
        public Task<IEnumerable<MeetingDto>> GetMeeting(MeetingDto payload);
        public Task<IEnumerable<CandidateModel>> GetCandidateByStage(StageDto payload);
        public Task<dynamic> GetMetrics();
-       public Task<IEnumerable<RoleModel>> GetJobByCode(string code);
        public Task<dynamic> CreateUser (BasicInfo payload);
        public Task<IEnumerable<BasicInfo>> GetBasicInfo(string email);
        public Task<dynamic> AdminAuth(AdminDto payload);
        public Task<IEnumerable<CandidateModel>> GetCandidateByMail(string mail);
        public Task<int> ConfirmEmail(string email);
-       public Task<IEnumerable<dynamic>> GetJobDescription(string code);
        public Task CreateComment(CommentDto payload);
        public Task<IEnumerable<CommentDto>> GetComments(string id);
        public Task<dynamic> CreateTeamsMeeting();
+    //    public Task<IEnumerable<MeetingDto>> GetMeetings();
     }
-
-   public interface IRolesRepository
-   {
-    public Task<IEnumerable<RoleModel>> GetRoles();
-    public Task<IEnumerable<CandidateModel>> PostRole();
-
-
-   }
 }

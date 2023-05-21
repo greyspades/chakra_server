@@ -16,9 +16,8 @@ public class LasmService : IJob
     }
         public async Task Execute(IJobExecutionContext context)
         {
-            //Write your custom code here
-            var cred = new CredHandler(_config);
-            await cred.Renew();
+            // var cred = new CredHandler(_config);
+            // await cred.Renew();
             Console.WriteLine("job ran");
             // return Task.CompletedTask;
         }

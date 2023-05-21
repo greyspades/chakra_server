@@ -1,20 +1,18 @@
 using Recruitment.Context;
-using Recruitment.Interface;
+using Candidate.Interface;
+using JobRole.Interface;
 using Microsoft.AspNetCore;
-using Recruitment.Repositories;
+using Candidate.Repository;
 using Microsoft.Extensions.FileProviders;
 using Resume.Models;
 using Cron.Handler;
 using Quartz;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Jobrole.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -22,6 +20,8 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
+builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
+
 builder.Services.Configure<ResumeDbSettings>(
     builder.Configuration.GetSection("ResumeDatabase"));
 
@@ -55,7 +55,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.Name = "cookieAuth";
         options.Cookie.SameSite = SameSiteMode.None; //TODO is this important?
         options.Cookie.HttpOnly = false;
-        // options.ExpireTimeSpan = TimeSpan.FromDays(1);
         options.SlidingExpiration = true;
         options.LoginPath = "/api/Candidate/signin";
         options.LogoutPath = "/api/User/logout";
@@ -76,7 +75,8 @@ builder.Services.AddCors(options =>
 });
 
 
-if(builder.Environment.IsDevelopment()) {
+if (builder.Environment.IsDevelopment())
+{
     builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
@@ -90,13 +90,12 @@ if(builder.Environment.IsDevelopment()) {
         });
 });
 }
-
-        var cookiePolicyOptions = new CookiePolicyOptions
-        {
-            MinimumSameSitePolicy = SameSiteMode.Lax,
-            // HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
-            Secure = CookieSecurePolicy.None,
-        };
+var cookiePolicyOptions = new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax,
+    // HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
+    Secure = CookieSecurePolicy.None,
+};
 
 var app = builder.Build();
 
@@ -110,7 +109,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapControllers();
 }
-app.UseCors(); 
+app.UseCors();
 
 app.UseCookiePolicy();
 
@@ -120,15 +119,14 @@ app.UseAuthentication();
 
 
 app.UseStaticFiles(new StaticFileOptions()
-        {
-            ServeUnknownFileTypes = true,
-            OnPrepareResponse = ctx => {
-            ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-            },
+{
+    ServeUnknownFileTypes = true,
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+    },
 
-        });
-
-// app.MapRazorPages();
+});
 
 app.MapDefaultControllerRoute();
 

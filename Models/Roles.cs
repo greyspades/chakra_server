@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Roles.Models;
-public class RoleModel
+public class JobRoleModel
 {
     public string? Id { get; set; }
     [Required]

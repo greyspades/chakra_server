@@ -7,7 +7,8 @@ using Newtonsoft.Json.Linq;
 
 namespace CredentialsHandler;
 
-public class CredHandler {
+public class CredHandler
+{
     public static string id { get; set; } = "72203447f8292549e12680877545";
     private readonly IConfiguration _config;
     public CredHandler(IConfiguration config)
@@ -15,25 +16,29 @@ public class CredHandler {
         this._config = config;
     }
 
-    public async Task<dynamic> MakeContract() {
+    public async Task<dynamic> MakeContract()
+    {
 
         HttpClient client = new();
-        
-            using HttpResponseMessage response = await client.GetAsync("http://10.0.0.184:8015/03a3b2c6f7d8e1c4_0a");
 
-            var credentials = "";
+        using HttpResponseMessage response = await client.GetAsync("http://10.0.0.184:8015/03a3b2c6f7d8e1c4_0a");
 
-            if(response.Headers.TryGetValues("x-lapo-eve-proc", out IEnumerable<string> resHeaders)) {
-                credentials = resHeaders.FirstOrDefault();
-            }
+        var credentials = "";
 
-            return credentials.Split("~");
+        if (response.Headers.TryGetValues("x-lapo-eve-proc", out IEnumerable<string> resHeaders))
+        {
+            credentials = resHeaders.FirstOrDefault();
+        }
+
+        return credentials.Split("~");
     }
 
-    public async Task Renew() {
-            try {
+    public async Task Renew()
+    {
+        try
+        {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            
+
             HttpClient client = new();
 
             var credentials = await connection.QueryAsync<CredentialsObj>("SELECT token, aeskey, aesiv FROM tokens WHERE id = '100'");
@@ -64,19 +69,22 @@ public class CredHandler {
 
             var decryptedJson = JObject.Parse(decrypted);
 
-            var cred = new CredentialsObj {
+            var cred = new CredentialsObj
+            {
                 AesIv = decryptedJson.Value<string>("aesIv"),
                 AesKey = decryptedJson.Value<string>("aesKey"),
                 Token = decryptedJson.Value<string>("access_token"),
             };
 
-            if(cred != null) {
+            if (cred != null)
+            {
                 Console.WriteLine("got the credentials");
                 await connection.ExecuteAsync("UPDATE tokens SET token = @Token, aeskey = @AesKey, aesiv = @AesIv WHERE id = '100'", cred);
             }
         }
-            catch(Exception e) {
-                Console.WriteLine(e.Message);
-            }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 }

@@ -1,4 +1,3 @@
-using Recruitment.Interface;
 using Recruitment.Context;
 using Candidate.Models;
 using Microsoft.AspNetCore.Http;
@@ -34,8 +33,9 @@ using System.Security.Policy;
 using Azure.Identity;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Candidate.Interface;
 
-namespace Recruitment.Repositories;
+namespace Candidate.Repository;
 public class CandidateRepository : ICandidateRepository
 {
     private readonly IConfiguration _config;
@@ -46,6 +46,7 @@ public class CandidateRepository : ICandidateRepository
     public async Task<IEnumerable<CandidateModel>> GetCandidates()
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
         var data = await connection.QueryAsync<CandidateModel>("Select * from Candidates");
 
         return data;
@@ -86,11 +87,11 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
-    public async Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string id)
+    public async Task<IEnumerable<CandidateModel>> GetCandidatesByRole(GetCandidatesDto payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE roleid = @Id", new { Id = id });
+        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE roleid = @Id", payload);
 
         return data;
     }
@@ -383,141 +384,11 @@ public class CandidateRepository : ICandidateRepository
 
         return jsonResponse;
     }
-
-    public async Task<IEnumerable<dynamic>> GetJobDescription(string code)
-    {
-        HttpClient client = new();
-
-        var cred = new CredHandler(_config);
-
-        var credData = await cred.MakeContract();
-
-        var token = new
-        {
-            tk = credData?[0],
-            src = "AS-IN-D659B-e3M",
-            rl = "118",
-            us = "0C9C4760-F96C-42AF-80B0-B29B9EDEF237"
-        };
-
-        var body = new
-        {
-            xParam = "", 
-            xScope = "Self",
-            xJFCode = code
-        };
-
-        var jsonHeader = JsonSerializer.Serialize(token);
-
-        var jsonBody = JsonSerializer.Serialize(body);
-
-        var encryptedBody = AEShandler.Encrypt(jsonBody, credData?[1], credData?[2]);
-
-        var encryptedHeader = AEShandler.Encrypt(jsonHeader, credData?[1], credData?[2]);
-
-        byte[] bodyBytes = Convert.FromBase64String(encryptedBody);
-
-        byte[] bytes = Convert.FromBase64String(encryptedHeader);
-
-        string hexString = BitConverter.ToString(bytes).Replace("-", "").ToLower();
-
-        string bodyHexString = BitConverter.ToString(bodyBytes).Replace("-", "").ToLower();
-
-        using StringContent content = new(
-            content: bodyHexString,
-                Encoding.UTF8,
-                "application/json");
-
-        client.DefaultRequestHeaders.Add("x-lapo-eve-proc", hexString + credData?[0]);
-
-        using HttpResponseMessage response = await client.PostAsync("http://10.0.0.184:8015/performance/retrievejobresponsibilitieslist", content);
-
-        var resData = await response.Content.ReadAsStringAsync();
-
-        var jsonData = JObject.Parse(resData);
-
-        if (jsonData.Value<string>("status") == "200")
-        {
-            byte[] stringBytes = Convert.FromHexString(jsonData.Value<string>("data"));
-
-            string bytes64 = Convert.ToBase64String(stringBytes);
-
-            var decrypted = AEShandler.Decrypt(bytes64, credData?[1], credData?[2]);
-
-            var data = JsonSerializer.Deserialize<IEnumerable<dynamic>>(decrypted);
-
-            return data;
-        }
-
-        return Array.Empty<IEnumerable<dynamic>>();
-    }
-
-    public async Task<IEnumerable<dynamic>> GetJobRoles()
-    {
-
-        HttpClient client = new();
-
-        var cred = new CredHandler(_config);
-
-        var credData = await cred.MakeContract();
-
-        var token = new
-        {
-            tk = credData?[0],
-            src = "AS-IN-D659B-e3M",
-            rl = "118",
-            us = "0C9C4760-F96C-42AF-80B0-B29B9EDEF237"
-        };
-
-        var jsonHeader = JsonSerializer.Serialize(token);
-
-        var encryptedHeader = AEShandler.Encrypt(jsonHeader, credData?[1], credData?[2]);
-
-        byte[] bytes = Convert.FromBase64String(encryptedHeader);
-
-        string hexString = BitConverter.ToString(bytes).Replace("-", "").ToLower();
-
-        client.DefaultRequestHeaders.Add("x-lapo-eve-proc", hexString + credData?[0]);
-
-        var default1 = "http://10.0.0.184:8015/shared/retrievejobfunctions/all/retrievejobfunctions";
-        var description = "http://10.0.0.184:8015/performance/admin/retrievejobresponsibilitieslist";
-
-        using HttpResponseMessage response = await client.GetAsync(default1);
-
-        var resData = await response.Content.ReadAsStringAsync();
-
-        var jsonData = JObject.Parse(resData);
-
-        if (jsonData.Value<string>("status") == "200")
-        {
-            byte[] stringBytes = Convert.FromHexString(jsonData.Value<string>("data"));
-
-            string bytes64 = Convert.ToBase64String(stringBytes);
-
-            var decrypted = AEShandler.Decrypt(bytes64, credData?[1], credData?[2]);
-
-            var data = JsonSerializer.Deserialize<IEnumerable<Job>>(decrypted);
-
-            return data;
-        }
-
-        return Array.Empty<IEnumerable<Job>>();
-    }
     public async Task<IEnumerable<MeetingDto>> GetMeetings()
     {
-
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         var data = await connection.QueryAsync<MeetingDto>("SELECT * FROM meetings WHERE completed = 'false'");
-
-        return data;
-    }
-    public async Task<IEnumerable<MeetingDto>> GetMeetingsByJob(string id)
-    {
-
-        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-
-        var data = await connection.QueryAsync<MeetingDto>("SELECT * FROM meetings WHERE completed = 'false' AND jobid = @Id", new { Id = id });
 
         return data;
     }
@@ -559,7 +430,7 @@ public class CandidateRepository : ICandidateRepository
 
         var applications = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates");
 
-        var jobRoles = await connection.QueryAsync<RoleModel>("SELECT * FROM roles");
+        var jobRoles = await connection.QueryAsync<JobRoleModel>("SELECT * FROM roles");
 
         var hired = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE status = 'Hired'");
 
@@ -572,16 +443,6 @@ public class CandidateRepository : ICandidateRepository
         };
 
         return result;
-    }
-
-    public async Task<IEnumerable<RoleModel>> GetJobByCode(string code)
-    {
-
-        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-
-        var data = await connection.QueryAsync<RoleModel>("SELECT * FROM roles WHERE code = @Code", new { Code = code });
-
-        return data;
     }
 
     public async Task<dynamic> CreateUser(BasicInfo payload)
@@ -739,8 +600,8 @@ public class CandidateRepository : ICandidateRepository
             var tenantId = "68a4b2bf-c074-44b7-822c-3e8a14cbac6d";
 
             // Values from app registration
-            var clientId = "14ad88f5-387e-41f8-93aa-2f737d6994ec";
-            var clientSecret = "4NY8Q~ky5oVxRXqjyZ9hOPZBY~9y22EHIXCQNaOf";
+            var clientId = "0e89d23d-081c-474b-9e6b-4fb5bfa81a69";
+            var clientSecret = "xm38Q~_7sf7Bqq1btw5LHVb3U5TepihxDK2JpcGL";
 
             // using Azure.Identity;
             var options = new TokenCredentialOptions
@@ -756,13 +617,15 @@ public class CandidateRepository : ICandidateRepository
 
             var requestBody = new OnlineMeeting
             {
-                StartDateTime = DateTimeOffset.Parse("2023-05-16T15:05:34.2444915-07:00"),
-                EndDateTime = DateTimeOffset.Parse("2023-05-16T15:20:34.2464912-07:00"),
+                StartDateTime = DateTimeOffset.Parse("2023-05-17T15:05:34.2444915-07:00"),
+                EndDateTime = DateTimeOffset.Parse("2023-05-17T15:20:34.2464912-07:00"),
                 Subject = "User Token Meeting",
             };
-            // var result = await graphClient.Me.OnlineMeetings.PostAsync(requestBody);
 
-            // return result;
-            return graphClient;
+            var result = await graphClient.Me.OnlineMeetings.PostAsync(requestBody);
+
+            Console.WriteLine(result);
+
+            return result;
     }
 }
