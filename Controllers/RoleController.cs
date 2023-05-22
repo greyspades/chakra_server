@@ -34,7 +34,6 @@ public class RoleController : ControllerBase
     [HttpGet]
     public async Task<ActionResult> GetRoles()
     {
-        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         var data = await _repo.GetRoles();
 
@@ -87,12 +86,12 @@ public class RoleController : ControllerBase
         }
     }
 
-    [HttpGet("byId/{id}")]
-    public async Task<ActionResult<JobRoleModel>> GetRoleById(string id)
+    [HttpPost("byId")]
+    public async Task<ActionResult<JobRoleModel>> GetRoleById(JobRoleDto payload)
     {
         try
         {
-            var data = await _repo.GetJobRoleById(id);
+            var data = await _repo.GetJobRoleById(payload.Id);
 
             var response = new {
                 code = 200,
@@ -127,16 +126,14 @@ public class RoleController : ControllerBase
         }
     }
 
-    [HttpGet("jobs/{page}/{take}")]
-    public async Task<ActionResult<string>> GetJobs(int page, int take) {
+    [HttpPost("getJobRoles")]
+    public async Task<ActionResult<string>> GetJobRoles(PaginationDto payload) {
         try {
             var data = await _repo.GetJobRoles();
 
-            // var take = 10;
-
-            var count = page * 10;
+            var count = payload.Page * 10;
             
-            var slicedCandidates = data.Skip(count).Take(take);
+            var slicedCandidates = data.Skip((int)count).Take((int)payload.Take);
 
             var response = new {
                 code = 200,
@@ -153,10 +150,10 @@ public class RoleController : ControllerBase
         }
     }
 
-    [HttpGet("code/{code}")]
-    public async Task<ActionResult> GetJobByCode(string code) {
+    [HttpPost("JobByCode")]
+    public async Task<ActionResult> GetJobByCode(JobRoleDto payload) {
         try {
-            var data = await _repo.GetJobByCode(code);
+            var data = await _repo.GetJobByCode(payload.Code);
 
             return Ok(data);
         }
@@ -173,10 +170,10 @@ public class RoleController : ControllerBase
     }
 
     
-    [HttpGet("description/{code}")]
-    public async Task<ActionResult> GetJobDescription(string code) {
+    [HttpPost("getJobDescription")]
+    public async Task<ActionResult> GetJobDescription(JobRoleDto payload) {
         try {
-            var data = await _repo.GetJobDescription(code);
+            var data = await _repo.GetJobDescription(payload.Code);
             if(data.Any()) {
                 var response = new {
                     code = 200,
@@ -207,14 +204,14 @@ public class RoleController : ControllerBase
         }
     }
     
-    [HttpGet("search/{value}")]
-    public async Task<ActionResult> SearchJob(string value) {
+    [HttpPost("search")]
+    public async Task<ActionResult> SearchJob(JobRoleDto payload) {
         try {
             
             var data = await _repo.GetJobRoles();
             List<Job> dataList = (List<Job>)data;
 
-            var result = dataList.FindAll((item) => item.Item.ToLower().Contains(value.ToLower()));
+            var result = dataList.FindAll((item) => item.Item.ToLower().Contains(payload.Value.ToLower()));
 
             return Ok(result);
         }

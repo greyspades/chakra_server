@@ -45,7 +45,7 @@ public class JobRoleRepository: IJobRoleRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<JobRoleModel>("SELECT * FROM Roles");
+        var data = await connection.QueryAsync<JobRoleModel>("Get_all_job_roles", commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -95,7 +95,7 @@ public class JobRoleRepository: IJobRoleRepository
 
         client.DefaultRequestHeaders.Add("x-lapo-eve-proc", hexString + credData?[0]);
 
-        using HttpResponseMessage response = await client.PostAsync("http://10.0.0.184:8015/performance/retrievejobresponsibilitieslist", content);
+        using HttpResponseMessage response = await client.PostAsync(_config.GetValue<string>("E360:Job_desc_url"), content);
 
         var resData = await response.Content.ReadAsStringAsync();
 
@@ -144,10 +144,7 @@ public class JobRoleRepository: IJobRoleRepository
 
         client.DefaultRequestHeaders.Add("x-lapo-eve-proc", hexString + credData?[0]);
 
-        var default1 = "http://10.0.0.184:8015/shared/retrievejobfunctions/all/retrievejobfunctions";
-        var description = "http://10.0.0.184:8015/performance/admin/retrievejobresponsibilitieslist";
-
-        using HttpResponseMessage response = await client.GetAsync(default1);
+        using HttpResponseMessage response = await client.GetAsync(requestUri: _config.GetValue<string>("E360:Job_roles_url"));
 
         var resData = await response.Content.ReadAsStringAsync();
 
@@ -174,7 +171,7 @@ public class JobRoleRepository: IJobRoleRepository
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<MeetingDto>("SELECT * FROM meetings WHERE completed = 'false' AND jobid = @Id", new { Id = id });
+        var data = await connection.QueryAsync<MeetingDto>("Get_meetings_by_application", new { Id = id }, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -184,7 +181,7 @@ public class JobRoleRepository: IJobRoleRepository
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<JobRoleModel>("SELECT * FROM roles WHERE code = @Code", new { Code = code });
+        var data = await connection.QueryAsync<JobRoleModel>("Get_Jobroles_by_code", new { Code = code }, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -193,7 +190,7 @@ public class JobRoleRepository: IJobRoleRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<JobRoleModel>("SELECT * FROM roles where unit = @Unit", new { Unit = unit });
+        var data = await connection.QueryAsync<JobRoleModel>("Get_Jobroles_by_unit", new { Unit = unit }, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -202,13 +199,13 @@ public class JobRoleRepository: IJobRoleRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        await connection.ExecuteAsync("INSERT into Roles(id, name, description, experience, deadline, unit, code, status) VALUES (@Id, @Name, @Description, @Experience, @Deadline, @Unit, @Code, @Status)", payload);
+        await connection.ExecuteAsync("Create_job_role", payload, commandType: CommandType.StoredProcedure);
     }
     public async Task<JobRoleModel> GetJobRoleById(string id)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync("SELECT * FROM roles where id = @Id", new { Id = id });
+        var data = await connection.QueryAsync("Get_jobrole_by_id", new { Id = id }, commandType: CommandType.StoredProcedure);
 
         return data.First();
     }
@@ -217,7 +214,7 @@ public class JobRoleRepository: IJobRoleRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<JobRoleModel>("SELECT * FROM roles where unit = @Unit", new { Unit = unit });
+        var data = await connection.QueryAsync<JobRoleModel>("Get_jobrole_by_unit", new { Unit = unit }, commandType: CommandType.StoredProcedure);
 
         return data.First();
     }

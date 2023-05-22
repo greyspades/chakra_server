@@ -15,7 +15,7 @@ namespace Candidate.Interface
        public Task<IEnumerable<CandidateModel>> GetCandidateById(string Id);
        public Task<string> CreateCandidate(CandidateModel payload);
        public Task<string> UpdateData(UpdateEmail payload);
-       public Task<IEnumerable<CandidateModel>> GetCandidatesByRole(GetCandidatesDto payload);
+       public Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string Id);
        public Task<string> UpdateStage(UpdateRole payload);
        public Task<string> CancelApplication(CancelApplication id);
        public Task<IEnumerable<CandidateModel>> GetStatus(GetStatusDto payload);

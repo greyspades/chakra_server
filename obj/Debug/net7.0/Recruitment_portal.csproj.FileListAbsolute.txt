@@ -141,3 +141,4 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Kiot
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Kiota.Serialization.Json.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Kiota.Serialization.Text.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Tavis.UriTemplates.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\apssettings.Production.json

@@ -98,7 +98,6 @@ public class CandidateByFlagDto {
 public class FlagCandidateDto {
     public string? Id { get; set; }
     public string? Flag { get; set; }
-
     public string? RoleName { get; set; }
 }
 
@@ -168,6 +167,10 @@ public class GetCandidatesDto {
     public string? Id { get; set; }
     public int? Page { get; set; }
     public int? Take { get; set; }
+}
+
+public class CandidateDto {
+    public string? Id { get; set; }
 }
 
 public class CommentDto {

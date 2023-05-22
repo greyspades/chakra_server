@@ -22,3 +22,15 @@ public class Job {
     public string? Item { get; set; }
     public string? Code { get; set; }
 }
+
+public class PaginationDto {
+    public int? Page { get; set; }
+    public int? Take { get; set; }
+}
+
+public class JobRoleDto {
+    public string? Id { get; set; }
+    public string? Code { get; set; }
+    public string? Value { get; set; }
+
+}

@@ -4,12 +4,13 @@ using Microsoft.Data.SqlClient;
 using Dapper;
 using Credentials.Models;
 using Newtonsoft.Json.Linq;
+using System.Data;
 
 namespace CredentialsHandler;
 
 public class CredHandler
 {
-    public static string id { get; set; } = "72203447f8292549e12680877545";
+    // public static string id { get; set; } = ;
     private readonly IConfiguration _config;
     public CredHandler(IConfiguration config)
     {
@@ -21,7 +22,7 @@ public class CredHandler
 
         HttpClient client = new();
 
-        using HttpResponseMessage response = await client.GetAsync("http://10.0.0.184:8015/03a3b2c6f7d8e1c4_0a");
+        using HttpResponseMessage response = await client.GetAsync(_config.GetValue<string>("E360:contract"));
 
         var credentials = "";
 
@@ -41,7 +42,7 @@ public class CredHandler
 
             HttpClient client = new();
 
-            var credentials = await connection.QueryAsync<CredentialsObj>("SELECT token, aeskey, aesiv FROM tokens WHERE id = '100'");
+            var credentials = await connection.QueryAsync<CredentialsObj>("Get_credentials", commandType: CommandType.StoredProcedure);
 
             var token = credentials.FirstOrDefault().Token;
 
@@ -49,9 +50,9 @@ public class CredHandler
 
             var aesIv = credentials.FirstOrDefault().AesIv;
 
-            client.DefaultRequestHeaders.Add("x-lapo-eve-proc", token + id);
+            client.DefaultRequestHeaders.Add("x-lapo-eve-proc", token + _config.GetValue<string>("LASM_cred:Id"));
 
-            using HttpResponseMessage response = await client.GetAsync("http://10.0.0.184:8023/generateuserkey");
+            using HttpResponseMessage response = await client.GetAsync(_config.GetValue<string>("LASM_cred:User_key_url"));
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
 
@@ -79,7 +80,7 @@ public class CredHandler
             if (cred != null)
             {
                 Console.WriteLine("got the credentials");
-                await connection.ExecuteAsync("UPDATE tokens SET token = @Token, aeskey = @AesKey, aesiv = @AesIv WHERE id = '100'", cred);
+                await connection.ExecuteAsync("Store_credentials", cred, commandType: CommandType.StoredProcedure);
             }
         }
         catch (Exception e)

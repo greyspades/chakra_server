@@ -47,7 +47,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("Select * from Candidates");
+        var data = await connection.QueryAsync<CandidateModel>("Get_all_applications", commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -70,11 +70,11 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        _ = await connection.ExecuteAsync("INSERT into Candidates(id, firstname, lastname, email, stage, roleid, status, dob, applDate, password, phone, experience, cvpath, cvextension, education, gender, otherName, coverletter, jobname) VALUES (@id, @FirstName, @LastName, @Email, 1, @RoleId, 'Pending', @Dob, @ApplDate, @Password, @Phone, @Experience, @CvPath, @CvExtension, @Education, @Gender, @OtherName, @CoverLetter, @JobName)", payload);
+        _ = await connection.ExecuteAsync("Create_application", payload, commandType: CommandType.StoredProcedure);
 
         for (int i = 0; i < payload?.Skills.Count; i++)
         {
-            await connection.ExecuteAsync("INSERT into Skills(id, skill, unit) VALUES(@Xid, @Item, @Unit)", new { Item = payload.Skills[i], Xid = payload.Id, Unit = payload.RoleId });
+            await connection.ExecuteAsync("Add_skills", new { Item = payload.Skills[i], Xid = payload.Id, Unit = payload.RoleId }, commandType: CommandType.StoredProcedure);
         };
 
         return "Successful";
@@ -83,30 +83,28 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("UPDATE Candidates SET email = @Email WHERE id = @Id", payload);
+        var data = await connection.ExecuteAsync("Get_jobs", payload, commandType: CommandType.StoredProcedure);
 
         return "Successful";
     }
-    public async Task<IEnumerable<CandidateModel>> GetCandidatesByRole(GetCandidatesDto payload)
+    public async Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string Id)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE roleid = @Id", payload);
-
+        IEnumerable<CandidateModel>? data = await connection.QueryAsync<CandidateModel>("Get_jobs", new { Id }, commandType: CommandType.StoredProcedure);
         return data;
     }
     public async Task<IEnumerable<string>> GetSkills(string id)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-        var data = await connection.QueryAsync<string>("SELECT skill from Skills where id = @Id", new { Id = id });
+        var data = await connection.QueryAsync<string>("Get_skills", new { Id = id }, commandType: CommandType.StoredProcedure);
 
         return data;
     }
     public async Task<IEnumerable<string>> GetCandidateBySkills(SkillsInput payload)
     {
-
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-        var data = await connection.QueryAsync<string>("SELECT skill from Skills WHERE id = @Id AND unit = @Unit", payload);
+        var data = await connection.QueryAsync<string>("Get_candidate_by_skills", payload, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -114,7 +112,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("UPDATE candidates SET stage = @Stage WHERE id = @Id", payload);
+        var data = await connection.ExecuteAsync("Update_stage", payload, commandType: CommandType.StoredProcedure);
 
         return "Successful";
     }
@@ -122,7 +120,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var currentId = await connection.QueryAsync<string>("SELECT currentid from tempid WHERE id = '100'");
+        var currentId = await connection.QueryAsync<string>("Get_last_temp_id", commandType: CommandType.StoredProcedure);
 
         var summation = int.Parse(currentId.FirstOrDefault()!) + 1;
 
@@ -130,11 +128,11 @@ public class CandidateRepository : ICandidateRepository
 
         Console.WriteLine(tempId);
 
-        await connection.ExecuteAsync("UPDATE candidates SET tempid = @TempId WHERE id = @Id", new { Id = payload.Id, TempId = tempId });
+        await connection.ExecuteAsync("Set_temp_id", new { Id = payload.Id, TempId = tempId }, commandType: CommandType.StoredProcedure);
 
-        await connection.ExecuteAsync("UPDATE tempid SET currentid = @TempId WHERE id = '100'", new { TempId = tempId });
+        await connection.ExecuteAsync("Update_last_temp_id", new { TempId = tempId }, commandType: CommandType.StoredProcedure);
 
-        await connection.ExecuteAsync("UPDATE candidates SET status = 'Hired' WHERE id = @Id", payload);
+        await connection.ExecuteAsync("Hire_candidate", new { Id = payload.Id}, commandType: CommandType.StoredProcedure);
 
         return $"TSN{tempId}";
     }
@@ -142,7 +140,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<BasicInfo>("SELECT * from basicinfo WHERE email = @Email", payload);
+        var data = await connection.QueryAsync<BasicInfo>("Get_info_by_email", payload, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -150,7 +148,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CredentialsObj>("SELECT token, aeskey, aesiv FROM tokens WHERE id = '100'");
+        var data = await connection.QueryAsync<CredentialsObj>("Get_cred", commandType: CommandType.StoredProcedure);
 
         return data.First();
     }
@@ -158,7 +156,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("UPDATE candidates SET status = 'Canceled' WHERE id = @Id", payload);
+        var data = await connection.ExecuteAsync("Cancel_application", new { Id = payload.Id }, commandType: CommandType.StoredProcedure);
 
         return "Successful";
     }
@@ -166,7 +164,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("UPDATE candidates SET flag = @Flag WHERE id = @Id", payload);
+        var data = await connection.ExecuteAsync("Flag_application", new { Id = payload.Id, Flag = payload.Flag}, commandType: CommandType.StoredProcedure);
 
         return "Successful";
     }
@@ -174,7 +172,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email", payload);
+        var data = await connection.QueryAsync<CandidateModel>("Get_status", payload, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -182,7 +180,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * FROM Candidates WHERE roleid = @RoleId and flag = @Flag", payload);
+        var data = await connection.QueryAsync<CandidateModel>("Get_application_by_flag", payload, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -216,7 +214,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * from candidates WHERE email = @Email and roleid = @RoleId", payload);
+        var data = await connection.QueryAsync<CandidateModel>("Check_application", payload, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -288,7 +286,7 @@ public class CandidateRepository : ICandidateRepository
 
         HttpClient client = new();
 
-        var token = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Ik9uaTBjaFdvUWZ5eExfbVdMVm1pVFEiLCJleHAiOjE3MzU1NzcxMDAsImlhdCI6MTY4MzUzNjM3OX0.JevQmwj0ZRvR_vmdd_yQNmKZN9Sz47U3LQ85RjiOHpM";
+        var token = _config.GetValue<string>("Zoom:Token");
 
         client.DefaultRequestHeaders.Add("authorization", "bearer" + token);
 
@@ -322,7 +320,7 @@ public class CandidateRepository : ICandidateRepository
                 Encoding.UTF8,
                 "application/json");
 
-        using HttpResponseMessage response = await client.PostAsync("https://api.zoom.us/v2/users/me/meetings", jsonContent);
+        using HttpResponseMessage response = await client.PostAsync(_config.GetValue<string>("Zoom:Url"), jsonContent);
 
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
@@ -354,7 +352,7 @@ public class CandidateRepository : ICandidateRepository
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        await connection.ExecuteAsync("INSERT into meetings(meetingid, password, participantid, topic, date, time, completed, link, jobId, firstname, jobtitle, email, lastname) VALUES(@MeetingId, @Password, @ParticipantId, @Topic, @Date, @Time, @Completed, @Link, @JobId, @FirstName, @JobTitle, @Email, @LastName)", payload);
+        await connection.ExecuteAsync("Create_meeting", payload, commandType: CommandType.StoredProcedure);
     }
     public async Task<string> SendMail(EmailDto payload, CredentialsObj cred)
     {
@@ -377,7 +375,7 @@ public class CandidateRepository : ICandidateRepository
         };
 
         using HttpResponseMessage response = await client.PostAsync(
-            "http://10.0.0.184:8023/sendmail-raw", multipartContent
+            _config.GetValue<string>("E360:Mail_url"), multipartContent
         );
 
         var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -388,7 +386,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<MeetingDto>("SELECT * FROM meetings WHERE completed = 'false'");
+        var data = await connection.QueryAsync<MeetingDto>("Get_meetings", commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -398,7 +396,7 @@ public class CandidateRepository : ICandidateRepository
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<MeetingDto>("SELECT * from meetings WHERE time = @Time AND date = @Date", payload);
+        var data = await connection.QueryAsync<MeetingDto>("Get_meetings_by_time", payload, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -412,11 +410,11 @@ public class CandidateRepository : ICandidateRepository
 
         if (payload.RoleId == "All")
         {
-            data = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE stage = @Stage", payload);
+            data = await connection.QueryAsync<CandidateModel>("Get_applications_by_stage", payload, commandType: CommandType.StoredProcedure);
         }
         else
         {
-            data = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE stage = @Stage AND roleid = @RoleId", payload);
+            data = await connection.QueryAsync<CandidateModel>("Get_applications_by_stage_and_role", payload, commandType: CommandType.StoredProcedure);
         }
 
         return data;
@@ -426,13 +424,13 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var finalists = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE stage = '3'");
+        var finalists = await connection.QueryAsync<CandidateModel>("Get_finalists", commandType: CommandType.StoredProcedure);
 
-        var applications = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates");
+        var applications = await connection.QueryAsync<CandidateModel>("Get_all_applications", commandType: CommandType.StoredProcedure);
 
-        var jobRoles = await connection.QueryAsync<JobRoleModel>("SELECT * FROM roles");
+        var jobRoles = await connection.QueryAsync<JobRoleModel>("Get_all_job_roles", commandType: CommandType.StoredProcedure);
 
-        var hired = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE status = 'Hired'");
+        var hired = await connection.QueryAsync<CandidateModel>("Get_all_hired_applicants", commandType: CommandType.StoredProcedure);
 
         var result = new
         {
@@ -450,7 +448,7 @@ public class CandidateRepository : ICandidateRepository
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("INSERT INTO basicInfo(firstname, lastname, othername, phone, email, dob, password, address, gender, maritalstatus, id) VALUES (@FirstName, @LastName, @OtherName, @Phone, @Email, @Dob, @Password, @Address, @Gender, @MaritalStatus, @Id)", payload);
+        var data = await connection.ExecuteAsync("Create_new_user", payload, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -460,7 +458,7 @@ public class CandidateRepository : ICandidateRepository
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<BasicInfo>("SELECT * FROM basicinfo WHERE email = @Email", new { Email = email });
+        var data = await connection.QueryAsync<BasicInfo>("Gets_user_by_email", new { Email = email }, commandType: CommandType.StoredProcedure);
 
         return data;
 
@@ -512,7 +510,7 @@ public class CandidateRepository : ICandidateRepository
 
         client.DefaultRequestHeaders.Add("x-lapo-eve-proc", hexString + credData?[0]);
 
-        using HttpResponseMessage response = await client.PostAsync("http://10.0.0.184:8015/userservices/mobile/authenticatem", jsonContent);
+        using HttpResponseMessage response = await client.PostAsync(_config.GetValue<string>("E360:Signin_url"), jsonContent);
 
         var resData = await response.Content.ReadAsStringAsync();
 
@@ -558,7 +556,7 @@ public class CandidateRepository : ICandidateRepository
         Console.Write(mail);
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE email = @Email", new { Email = mail });
+        var data = await connection.QueryAsync<CandidateModel>("Get_application_by_email", new { Email = mail }, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -567,7 +565,7 @@ public class CandidateRepository : ICandidateRepository
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("UPDATE basicinfo SET emailValid = 'True' WHERE email = @Email", new { Email = email});
+        var data = await connection.ExecuteAsync("Validate_email", new { Email = email}, commandType: CommandType.StoredProcedure);
 
         return data;
 
@@ -576,14 +574,14 @@ public class CandidateRepository : ICandidateRepository
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        await connection.ExecuteAsync("INSERT INTO comments(id, firstname, lastname, date, comment) VALUES (@Id, @Firstname, @Lastname, @Date, @Comment)", payload);
+        await connection.ExecuteAsync("Creates_comment", payload, commandType: CommandType.StoredProcedure);
     }
 
     public async Task<IEnumerable<CommentDto>> GetComments(string id) {
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CommentDto>("SELECT * FROM comments WHERE id = @Id", new { Id = id});
+        var data = await connection.QueryAsync<CommentDto>("Gets_comment_by_Application", new { Id = id}, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -597,11 +595,11 @@ public class CandidateRepository : ICandidateRepository
 
             // Multi-tenant apps can use "common",
             // single-tenant apps must use the tenant ID from the Azure portal
-            var tenantId = "68a4b2bf-c074-44b7-822c-3e8a14cbac6d";
+            var tenantId = _config.GetValue<string>("Graph_api:tenant_id");
 
             // Values from app registration
-            var clientId = "0e89d23d-081c-474b-9e6b-4fb5bfa81a69";
-            var clientSecret = "xm38Q~_7sf7Bqq1btw5LHVb3U5TepihxDK2JpcGL";
+            var clientId = _config.GetValue<string>("Graph_api:client_id");
+            var clientSecret = _config.GetValue<string>("Graph_api:client_secret");
 
             // using Azure.Identity;
             var options = new TokenCredentialOptions
@@ -617,8 +615,8 @@ public class CandidateRepository : ICandidateRepository
 
             var requestBody = new OnlineMeeting
             {
-                StartDateTime = DateTimeOffset.Parse("2023-05-17T15:05:34.2444915-07:00"),
-                EndDateTime = DateTimeOffset.Parse("2023-05-17T15:20:34.2464912-07:00"),
+                StartDateTime = DateTimeOffset.Parse("2023-05-26T15:05:34.2444915-07:00"),
+                EndDateTime = DateTimeOffset.Parse("2023-05-26T15:20:34.2464912-07:00"),
                 Subject = "User Token Meeting",
             };
 

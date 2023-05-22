@@ -66,12 +66,12 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpPost]
-    public async Task<ActionResult<List<CandidateModel>>> GetCandidateById(string id)
+    [HttpPost("id")]
+    public async Task<ActionResult<List<CandidateModel>>> GetCandidateById(CandidateDto payload)
     {
         try
         {
-            var data = await _repo.GetCandidateById(id);
+            var data = await _repo.GetCandidateById(payload.Id);
 
             var sample = new
             {
@@ -91,7 +91,7 @@ public class CandidateController : ControllerBase
     }
 
     [DisableCors]
-    [HttpPost]
+    [HttpPost("create")]
     public async Task<ActionResult<List<CandidateModel>>> CreateCandidate([FromForm] CandidateModel payload)
     {
         if (ModelState.IsValid)
@@ -212,11 +212,12 @@ public class CandidateController : ControllerBase
     }
 
     [HttpPost("skills")]
-    public async Task<ActionResult<List<string>>> GetSkills(string id)
+    public async Task<ActionResult<List<string>>> GetSkills(CandidateDto payload)
     {
         try
         {
-            var data = await _repo.GetSkills(id);
+
+            var data = await _repo.GetSkills(payload.Id);
 
             var response = new
             {
@@ -246,8 +247,6 @@ public class CandidateController : ControllerBase
                 var candidate = await _repo.GetCandidateById(payload.Id);
 
                 var candidateData = candidate.First();
-
-                // HTMLHelper? html = new();
 
                 var mailObj = new EmailDto {
                 Firstname = candidate.First().FirstName,
@@ -340,11 +339,10 @@ public class CandidateController : ControllerBase
                 var response = new {
                 code = 401,
                 message = "Candidate has already been hired",
-            };
+                };
 
             return Ok(response);
             }
-            
         }
         catch (Exception e) {
             Console.WriteLine(e.Message);
@@ -423,14 +421,12 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpGet("role")]
+    [HttpPost("role")]
     public async Task<ActionResult<List<CandidateModel>>> GetCandidateByRole(GetCandidatesDto payload)
     {
         try
         {
-            var data = await _repo.GetCandidatesByRole(payload);
-
-            // var take = 10;
+            var data = await _repo.GetCandidatesByRole(payload.Id);
 
             var count = payload.Page * 10;
             
@@ -533,14 +529,14 @@ public class CandidateController : ControllerBase
     }
 
 
-    [HttpPost("resume")]
+    [HttpGet("resume/{id}")]
     public ActionResult<dynamic> GetResume(string id)
     {
         try
         {
-            dynamic path2 = $"C:/Users/LAPO Mfb/Desktop/cv/{id}..pdf";
-            var extension = Path.GetExtension(path2);
-            var content = new FileStream(path2, FileMode.Open, FileAccess.Read, FileShare.Read);
+            dynamic path = $"C:/Users/LAPO Mfb/Desktop/cv/{id}..pdf";
+            var extension = Path.GetExtension(path);
+            var content = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             return File(content, "application/octet-stream");
         }
         catch (Exception e)
@@ -738,11 +734,7 @@ public class CandidateController : ControllerBase
     public async Task<ActionResult> SignIn(SignInDto payload) {
         try {
             var data = await _repo.GetBasicInfo(payload?.Email);
-
-            // Console.WriteLine(data.First().Password);
-            // Console.WriteLine("got to theis point");
-            // Console.WriteLine(payload.Password);
-
+            
             if(data.Any() && BC.Verify(payload.Password, data.First().Password) == true) {
 
                         var claims = new List<Claim>
