@@ -30,15 +30,16 @@ public class CandidateController : ControllerBase
     Guid guid = Guid.NewGuid();
     private readonly ICandidateRepository _repo;
     public IWebHostEnvironment _env;
-    private object data;
+    private readonly IConfiguration _config;
 
     // private readonly IMongoCollection<ResumeModel> _collection;
     // private readonly IMongoDatabase _mongoDb;
     private static readonly HttpClient client = new();
-    public CandidateController(IWebHostEnvironment environment, ICandidateRepository repo)
+    public CandidateController(IWebHostEnvironment environment, ICandidateRepository repo, IConfiguration config)
     {
         this._repo = repo;
         this._env = environment;
+        this._config = config;
         // var mongoClient = new MongoClient(
         //     dbSettings.Value.ConnectionString);
 
@@ -90,7 +91,6 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [DisableCors]
     [HttpPost("create")]
     public async Task<ActionResult<List<CandidateModel>>> CreateCandidate([FromForm] CandidateModel payload)
     {
@@ -114,14 +114,14 @@ public class CandidateController : ControllerBase
                         return Ok(response);
                     }
                 }
-                if(info.First().EmailValid != "True") {
-                    var response = new {
-                        code = 400,
-                        message = "Sorry please verify your email to continue"
-                    };
+                // if(info.First().EmailValid != "True") {
+                //     var response = new {
+                //         code = 400,
+                //         message = "Sorry please verify your email to continue"
+                //     };
 
-                    return Ok(response);
-                }
+                //     return Ok(response);
+                // }
                 if(
                     dateDifference > 6570
                 )
@@ -138,7 +138,7 @@ public class CandidateController : ControllerBase
 
                     var data = await _repo.CreateCandidate(payload);
 
-                    // CredentialsObj cred = await _repo.GetCredentials();
+                    CredentialsObj cred = await _repo.GetCredentials();
 
                     var mailObj = new EmailDto {
                         Firstname = payload.FirstName,
@@ -147,13 +147,13 @@ public class CandidateController : ControllerBase
                         HasFile = "No",
                         Body = HTMLHelper.Acknowledgement(payload),
                     };
-
-                    // var mail = await _repo.SendMail(mailObj, cred);
+    
+                    var mail = await _repo.SendMail(mailObj, cred);
 
                     var response = new
                     {
                         code = 200,
-                        data,
+                        message = "Application created successfully"
                     };
 
                     return Ok(response);
@@ -192,7 +192,19 @@ public class CandidateController : ControllerBase
             return StatusCode(500, "Invalid request body");
         }
     }
+    [HttpGet("token")]
+    public async Task<ActionResult> CreateMeetingToken() {
+        try {
+            var data = await _repo.CreateMeetingToken();
 
+            return Ok(data);
+        }
+        catch(Exception e) {
+
+            Console.WriteLine(e.Message);
+            return StatusCode(500, e.Message);
+        }
+    }
     [HttpPost("mail")]
     public async Task<ActionResult<string>> SendMail(EmailDto payload)
     {
@@ -247,6 +259,8 @@ public class CandidateController : ControllerBase
                 var candidate = await _repo.GetCandidateById(payload.Id);
 
                 var candidateData = candidate.First();
+
+                await _repo.CancelApplication(payload.Id);
 
                 var mailObj = new EmailDto {
                 Firstname = candidate.First().FirstName,
@@ -323,17 +337,31 @@ public class CandidateController : ControllerBase
     public async Task<ActionResult> HireCandidate (HireDto payload) {
         try {
             var can = await _repo.GetCandidateById(payload?.Id);
+
+            var canData = can.First();
+
+            var basic = await _repo.GetBasicInfo(canData.Email);
+
+            var basicInfo = basic.First();
             
-            if(can.First().TempId == null) {
-                var data = await _repo.HireCandidate(payload);
+            if(canData.TempId == null) {
+
+                // var data = await _repo.HireCandidate(payload);
+
+                payload.Address = basicInfo.Address;
+                payload.FirstName = canData.FirstName;
+                payload.LastName = canData.LastName;
+                payload.Position = canData.JobName;
+
+                var mail = _repo.SendOfferMail(payload);
 
                 var response = new {
                 code = 200,
-                message = "Successful",
-                data
-            };
+                message = "Candidate has been hired successfully",
+                mail
+                };
 
-            return Ok(response);
+                return Ok(response);
             }
             else {
                 var response = new {
@@ -341,7 +369,7 @@ public class CandidateController : ControllerBase
                 message = "Candidate has already been hired",
                 };
 
-            return Ok(response);
+                return Ok(response);
             }
         }
         catch (Exception e) {
@@ -358,15 +386,14 @@ public class CandidateController : ControllerBase
             Console.WriteLine(cv.FileName);
             if (cv != null)
             {
-                Console.WriteLine("theres something alright");
                 var data = await _repo.ParseCvAsync(cv, guid);
-                var cvMetaData = await _repo.ParseCvData(cv);
+                // var cvMetaData = await _repo.ParseCvData(cv);
                 var response = new
                 {
                     code = 200,
                     message = "success",
                     data,
-                    cvMeta = cvMetaData
+                    // cvMeta = cvMetaData
                 };
 
                 return Ok(response);
@@ -379,6 +406,21 @@ public class CandidateController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+    // [HttpGet("ref")]
+    // public async Task<ActionResult> GetRef() {
+    //     try {
+
+    //     } catch(Exception e) {
+    //         Console.WriteLine(e.Message);
+
+    //         var response = new {
+    //             code = 200,
+    //             message = "An error occured processing the request"
+    //         };
+
+    //         return StatusCode(500, response);
+    //     }
+    // }
 
     [HttpPost("/stage")]
     public async Task<ActionResult> UpdateStage(UpdateRole payload)
@@ -390,10 +432,10 @@ public class CandidateController : ControllerBase
                 var data = await _repo.UpdateStage(payload);
                 
                  var response = new
-            {
-                code = 200,
-                message = "Successfully moved to the next stage"
-            };
+                {
+                    code = 200,
+                    message = "Successfully moved to the next stage"
+                };
 
             return Ok(response);
             }
@@ -454,7 +496,7 @@ public class CandidateController : ControllerBase
     {
         try
         {
-            var data = await _repo.CancelApplication(payload);
+            var data = await _repo.CancelApplication(payload.Id);
 
             var response = new
             {
@@ -527,6 +569,94 @@ public class CandidateController : ControllerBase
             return StatusCode(500, "Invalid request body");
         }
     }
+    [HttpPost("mail_reset_options")]
+    public async Task<ActionResult> MailResetOptions(CandidateEmailDto payload) {
+        try {
+            var candidate = await _repo.GetCandidateByMail(payload.Email);
+            
+                if(candidate.Any()) {
+                    CredentialsObj cred = await _repo.GetCredentials();
+
+                    var encryptedEmail = AEShandler.Encrypt(payload.Email, _config.GetValue<string>("Encryption:Key"), _config.GetValue<string>("Encryption:Iv"));
+
+                    var resetObj = new PasswordResetFields {
+                        Link = AEShandler.Encrypt($"localhost:3000/password_reset?email={encryptedEmail}&token=00727143910", _config.GetValue<string>("Encryption:Key"), _config.GetValue<string>("Encryption:Iv")),
+                        FirstName = candidate.First().FirstName
+                    };
+
+                    var mailObj = new EmailDto {
+                        Firstname = candidate.First().FirstName,
+                        EmailAddress = payload.Email,
+                        Subject = "Reset your password",
+                        HasFile = "No",
+                        Body = HTMLHelper.PasswordReset(resetObj),
+                    };
+    
+                    var mailRes = await _repo.SendMail(mailObj, cred);
+
+                    var response = new {
+                        code = 200,
+                        message = "Please click the link sent to your email to reset your password",
+                        mail = mailRes
+                    };
+
+                    return Ok(response);
+                }
+                else {
+                    var response = new {
+                        code = 404,
+                        message = "That Email address does not exist on the system",
+
+                    };
+
+                    return Ok(response);
+                }
+            
+        }
+        catch(Exception e) {
+            Console.WriteLine(e.Message);
+            var response = new {
+                code = 500,
+                message = "Sorry an error occured processing your request"
+            };
+            
+            return StatusCode(500, response);
+        }
+    }
+
+    [HttpPost("reset_password")]
+    public async Task<ActionResult> ResetPassword(PasswordResetDto payload) {
+        try {
+            var mail = await _repo.CheckEmail(payload.Email);
+            if(mail.Any()) {
+                
+                await _repo.ResetPassword(payload);
+
+                var response = new {
+                    code = 200,
+                    message = "Your password has been updated successfully"
+                };
+
+            return Ok(response);
+            } else {
+                var response = new {
+                    code = 404,
+                    message = "Sorry that email address does not exist on our records"
+                };
+
+            return Ok(response);
+            }
+        }
+        catch(Exception e) {
+            Console.WriteLine(e.Message);
+            var response = new {
+                code = 500,
+                message = "Sorry could not process your request"
+            };
+
+            return StatusCode(500, response);
+        }
+    }
 
 
     [HttpGet("resume/{id}")]
@@ -534,7 +664,7 @@ public class CandidateController : ControllerBase
     {
         try
         {
-            dynamic path = $"C:/Users/LAPO Mfb/Desktop/cv/{id}..pdf";
+            dynamic path = $"cv/{id}..pdf";
             var extension = Path.GetExtension(path);
             var content = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             return File(content, "application/octet-stream");
@@ -575,8 +705,27 @@ public class CandidateController : ControllerBase
         try {
             var meeting = await _repo.GetMeeting(payload);
 
-            if(!meeting.Any()) {
-                      var data = await _repo.CreateMeeting(payload);
+            var pendingMeetings = await _repo.CheckMeetingStatus(payload.ParticipantId);
+
+            if(pendingMeetings.Any()) {
+                    var response = new {
+                    code = 401,
+                    message = "That candidate already has a meetings scheduled"
+                };
+
+                return Ok(response);
+            }
+            else if(meeting.Any()) {
+
+                var response = new {
+                    code = 401,
+                    message = "There is already a scheduled meeting for that time and date"
+                };
+
+                return Ok(response);
+            } else {
+                var token = await _repo.CreateMeetingToken();
+                        var data = await _repo.CreateMeeting(payload, token);
 
             payload.Link = data.Link;
             payload.MeetingId = data.MeetingId;
@@ -600,6 +749,10 @@ public class CandidateController : ControllerBase
             payload.Completed = "false";
 
             await _repo.StoreSessionInfo(data);
+
+            CredentialsObj cred = await _repo.GetCredentials();
+
+            await _repo.SendMail(mailObj, cred);
         
             var response = new {
                 code = 200,
@@ -608,15 +761,6 @@ public class CandidateController : ControllerBase
             };
 
             return Ok(response);
-            }
-            else {
-
-                var response = new {
-                    code = 401,
-                    message = "There is already a scheduled meeting for that time and date"
-                };
-
-                return Ok(response);
             }
         }
         catch(Exception e) {
@@ -670,7 +814,7 @@ public class CandidateController : ControllerBase
     public async Task<ActionResult> CreateUser(BasicInfo payload) {
         try {
 
-            var duplicate = await _repo.CheckEmail(payload);
+            var duplicate = await _repo.CheckEmail(payload.Email);
 
             if(!duplicate.Any()) {
                 var uuid = guid;
@@ -700,6 +844,23 @@ public class CandidateController : ControllerBase
             CookieAuthenticationDefaults.AuthenticationScheme, 
             new ClaimsPrincipal(claimsIdentity), 
             authProperties);
+
+            CredentialsObj cred = await _repo.GetCredentials();
+
+            var emailAddress = payload.Email;
+            
+            payload.Email = AEShandler.Encrypt(payload.Email, _config.GetValue<string>("Encryption:Key"), _config.GetValue<string>("Encryption:Iv"));
+
+
+                    var mailObj = new EmailDto {
+                        Firstname = payload.FirstName,
+                        EmailAddress = emailAddress,
+                        Subject = "Please confirm your email address",
+                        HasFile = "No",
+                        Body = HTMLHelper.VerifyEmail(payload),
+                    };
+    
+                    var mail = await _repo.SendMail(mailObj, cred);
 
             var response = new {
                 code = 200,
@@ -734,10 +895,16 @@ public class CandidateController : ControllerBase
     public async Task<ActionResult> SignIn(SignInDto payload) {
         try {
             var data = await _repo.GetBasicInfo(payload?.Email);
+
+            // Console.WriteLine(BC.Verify(payload.Password, data.First().Password));
+
+            // Console.WriteLine(payload.Password);
+
+            // Console.WriteLine(data.First().Password);
             
             if(data.Any() && BC.Verify(payload.Password, data.First().Password) == true) {
 
-                        var claims = new List<Claim>
+                var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Email, payload.Email),
                     new Claim(ClaimTypes.Name, data.First().Id),
@@ -836,16 +1003,15 @@ public class CandidateController : ControllerBase
         }
     }
     [HttpPost("validate")]
-    public async Task<ActionResult> ValidateEmail(string email) {
+    public async Task<ActionResult> ValidateEmail(CandidateEmailDto payload) {
         try {
-            var hash = BC.HashPassword(inputKey: email);
 
-            var mail = BC.InterrogateHash(email);
+            var decryptedEmail = AEShandler.Decrypt(payload.Email, _config.GetValue<string>("Encryption:Key"), _config.GetValue<string>("Encryption:Iv"));
 
-            var user = await _repo.GetBasicInfo(email);
+            var user = await _repo.GetBasicInfo(decryptedEmail);
             
             if(user.Any()) {
-                var data = await _repo.ConfirmEmail(email);
+                var data = await _repo.ConfirmEmail(decryptedEmail);
 
                 var response = new {
                     code = 200,
@@ -923,10 +1089,10 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpPost("comments")]
-    public async Task<ActionResult> GetComments(string id) {
+    [HttpPost("getcomments")]
+    public async Task<ActionResult> GetComments(CandidateDto payload) {
         try {
-            var data = await _repo.GetComments(id);
+            var data = await _repo.GetComments(payload.Id);
             
             var response = new {
                 code = 200,
@@ -962,6 +1128,23 @@ public class CandidateController : ControllerBase
             };
 
             return StatusCode(500, response);
+        }
+    }
+
+    [HttpPost("pdf")]
+    public ActionResult ParsePdf(HireDto payload)
+    {
+        try
+        {
+            var data = _repo.SendOfferMail(payload);
+
+            return Ok(data);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+
+            return StatusCode(500, e.Message);
         }
     }
 }

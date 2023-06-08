@@ -10,7 +10,6 @@ namespace CredentialsHandler;
 
 public class CredHandler
 {
-    // public static string id { get; set; } = ;
     private readonly IConfiguration _config;
     public CredHandler(IConfiguration config)
     {
@@ -19,7 +18,6 @@ public class CredHandler
 
     public async Task<dynamic> MakeContract()
     {
-
         HttpClient client = new();
 
         using HttpResponseMessage response = await client.GetAsync(_config.GetValue<string>("E360:contract"));
@@ -56,12 +54,13 @@ public class CredHandler
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
 
-            using StreamWriter outputFile = new("C:/Users/LAPO Mfb/Desktop/tokenlogs/cred.txt", true);
+            using StreamWriter outputFile = new("tokenlogs.txt", true);
 
             await outputFile.WriteAsync(jsonResponse);
 
             var jsonObject = JObject.Parse(jsonResponse);
 
+            if(jsonObject.Value<int>("status") == 200) {
             byte[] stringBytes = Convert.FromHexString(jsonObject.Value<string>("data"));
 
             string bytes64 = Convert.ToBase64String(stringBytes);
@@ -82,10 +81,15 @@ public class CredHandler
                 Console.WriteLine("got the credentials");
                 await connection.ExecuteAsync("Store_credentials", cred, commandType: CommandType.StoredProcedure);
             }
+            }
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
+
+            using StreamWriter outputFile = new("tokenlogs.txt", true);
+
+            await outputFile.WriteAsync(e.Message);
         }
     }
 }

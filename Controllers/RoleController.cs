@@ -53,12 +53,12 @@ public class RoleController : ControllerBase
         try
         {
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            payload.Id = guid.ToString();
 
             var duplicate = await _repo.GetJobByCode(payload.Code);
 
 
             if(!duplicate.Any()) {
+                payload.Id = guid.ToString();
                 await _repo.AddJobRole(payload);
             }
 

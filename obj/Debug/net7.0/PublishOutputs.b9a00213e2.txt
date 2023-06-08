@@ -1,7 +1,7 @@
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Recruitment_portal.exe
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\appsettings.Development.json
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\appsettings.json
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\apssettings.Production.json
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\appsettings.Production.json
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Recruitment_portal.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Recruitment_portal.deps.json
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Recruitment_portal.runtimeconfig.json

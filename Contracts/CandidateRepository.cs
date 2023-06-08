@@ -6,9 +6,9 @@ using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Data;
 using System.Drawing.Printing;
-using Sovren;
-using Sovren.Models;
-using Sovren.Models.API.Parsing;
+// using Sovren;
+// using Sovren.Models;
+// using Sovren.Models.API.Parsing;
 using MongoDB.Driver;
 using AsposeDoc = global::Aspose.Words;
 using MimeKit;
@@ -34,6 +34,11 @@ using Azure.Identity;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Candidate.Interface;
+using Spire.Doc;
+// using AsposePdf = global::Aspose.Pdf;
+// using Aspose.Pdf.Text;
+// using System.Reflection.Metadata;
+// using Aspose.Pdf;
 
 namespace Candidate.Repository;
 public class CandidateRepository : ICandidateRepository
@@ -70,12 +75,37 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        _ = await connection.ExecuteAsync("Create_application", payload, commandType: CommandType.StoredProcedure);
-
-        for (int i = 0; i < payload?.Skills.Count; i++)
+        var body = new
         {
-            await connection.ExecuteAsync("Add_skills", new { Item = payload.Skills[i], Xid = payload.Id, Unit = payload.RoleId }, commandType: CommandType.StoredProcedure);
+            email = payload.Email,
+            id = payload.Id,
+            stage = payload.Stage,
+            firstname = payload.FirstName,
+            lastname = payload.LastName,
+            experience = payload.Experience,
+            education = payload.Education,
+            phone = payload.Phone,
+            roleid = payload.RoleId,
+            status = payload.Status,
+            applDate = payload.ApplDate,
+            dob = payload.Dob,
+            password = payload.Password,
+            jobname = payload.JobName,
+            coverletter = payload.CoverLetter,
+            gender = payload.Gender,
+            othername = payload.OtherName,
+            // address = payload.Address
         };
+
+        await connection.ExecuteAsync("Create_application", body, commandType: CommandType.StoredProcedure);
+
+        if (payload.Skills != null)
+        {
+            for (int i = 0; i < payload?.Skills.Count; i++)
+            {
+                await connection.ExecuteAsync("Add_skills", new { Item = payload.Skills[i], Xid = payload.Id, Unit = payload.RoleId }, commandType: CommandType.StoredProcedure);
+            };
+        }
 
         return "Successful";
     }
@@ -132,15 +162,15 @@ public class CandidateRepository : ICandidateRepository
 
         await connection.ExecuteAsync("Update_last_temp_id", new { TempId = tempId }, commandType: CommandType.StoredProcedure);
 
-        await connection.ExecuteAsync("Hire_candidate", new { Id = payload.Id}, commandType: CommandType.StoredProcedure);
+        await connection.ExecuteAsync("Hire_candidate", new { Id = payload.Id }, commandType: CommandType.StoredProcedure);
 
         return $"TSN{tempId}";
     }
-    public async Task<IEnumerable<BasicInfo>> CheckEmail(BasicInfo payload)
+    public async Task<IEnumerable<BasicInfo>> CheckEmail(string email)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<BasicInfo>("Get_info_by_email", payload, commandType: CommandType.StoredProcedure);
+        var data = await connection.QueryAsync<BasicInfo>("Get_info_by_email", new { Email = email }, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -152,11 +182,11 @@ public class CandidateRepository : ICandidateRepository
 
         return data.First();
     }
-    public async Task<string> CancelApplication(CancelApplication payload)
+    public async Task<string> CancelApplication(string id)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("Cancel_application", new { Id = payload.Id }, commandType: CommandType.StoredProcedure);
+        var data = await connection.ExecuteAsync("Cancel_application", new { Id = id }, commandType: CommandType.StoredProcedure);
 
         return "Successful";
     }
@@ -164,7 +194,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("Flag_application", new { Id = payload.Id, Flag = payload.Flag}, commandType: CommandType.StoredProcedure);
+        var data = await connection.ExecuteAsync("Flag_application", new { Id = payload.Id, Flag = payload.Flag }, commandType: CommandType.StoredProcedure);
 
         return "Successful";
     }
@@ -190,8 +220,7 @@ public class CandidateRepository : ICandidateRepository
         string guid = id.ToString();
 
         var extension = Path.GetExtension(formFile.FileName);
-        var path = $"C:/Users/LAPO Mfb/Desktop/cv/{guid}.{extension}";
-        var path2 = $"wwwroot/cv/{guid}.docx";
+        var path = $"cv/{guid}.{extension}";
         var fileData = new
         {
             extension,
@@ -226,67 +255,89 @@ public class CandidateRepository : ICandidateRepository
         return memoryStream.ToArray();
     }
 
-    public async Task<dynamic> ParseCvData(IFormFile cv)
+    // public async Task<dynamic> ParseCvData(IFormFile cv)
+    // {
+    //     SovrenClient client = new SovrenClient("39626765", "Gz5jNQ3fSzfuClZuAo1RjqOaJkKBsKSN6pHc0KK/", DataCenter.EU);
+
+    //     var path = "C:/Users/LAPO Mfb/Desktop/cv/resume.pdf";
+    //     try
+    //     {
+    //         var bytes = await GetBytes(cv);
+
+    //         Document doc = new(bytes, File.GetLastWriteTime(path));
+
+    //         ParseRequest request = new(doc);
+
+    //         ParseResumeResponse response = await client.ParseResume(request);
+    //         Console.WriteLine("made a successful request");
+    //         //if we get here, it was 200-OK and all operations succeeded
+
+    //         //now we can use the response from Sovren to output some of the data from the resume
+    //         if (response != null)
+    //         {
+    //             var res = new
+    //             {
+    //                 firstname = response.EasyAccess().GetCandidateName().GivenName,
+    //                 lastname = response.EasyAccess().GetCandidateName().FamilyName,
+    //                 email = response.EasyAccess().GetEmailAddresses()?.FirstOrDefault<dynamic>(),
+    //                 employers = response.EasyAccess().GetAllEmployers()?.FirstOrDefault<dynamic>(),
+    //                 roles = response.EasyAccess().GetAllJobTitles()?.FirstOrDefault<dynamic>(),
+    //                 experience = response?.Value?.ResumeData?.EmploymentHistory?.Positions,
+    //                 degree = response.EasyAccess().GetHighestDegree()?.Name,
+    //                 contact = response.EasyAccess().GetContactInfo()?.Telephones?.FirstOrDefault<dynamic>(),
+    //                 address = response.EasyAccess().GetContactInfo()?.Location?.Regions?.FirstOrDefault<dynamic>(),
+    //                 skills = response?.Value?.ResumeData.Skills,
+    //                 education = response?.Value?.ResumeData?.Education
+    //             };
+
+    //             return res;
+    //         }
+    //         else
+    //         {
+    //             return new
+    //             {
+    //                 code = 500,
+    //                 message = "could not process the request"
+    //             };
+    //         }
+
+    //     }
+    //     catch (SovrenException e)
+    //     {
+    //         //the document could not be parsed, always try/catch for SovrenExceptions when using SovrenClient
+    //         Console.WriteLine($"Error: {e.SovrenErrorCode}, Message: {e.Message}");
+
+    //         return e.Message;
+    //     }
+    // }
+    public async Task<string> CreateMeetingToken()
     {
-        SovrenClient client = new SovrenClient("39626765", "Gz5jNQ3fSzfuClZuAo1RjqOaJkKBsKSN6pHc0KK/", DataCenter.EU);
-
-        var path = "C:/Users/LAPO Mfb/Desktop/cv/resume.pdf";
-        try
-        {
-            var bytes = await GetBytes(cv);
-
-            Document doc = new(bytes, File.GetLastWriteTime(path));
-
-            ParseRequest request = new(doc);
-
-            ParseResumeResponse response = await client.ParseResume(request);
-            Console.WriteLine("made a successful request");
-            //if we get here, it was 200-OK and all operations succeeded
-
-            //now we can use the response from Sovren to output some of the data from the resume
-            if (response != null)
-            {
-                var res = new
-                {
-                    firstname = response.EasyAccess().GetCandidateName().GivenName,
-                    lastname = response.EasyAccess().GetCandidateName().FamilyName,
-                    email = response.EasyAccess().GetEmailAddresses()?.FirstOrDefault<dynamic>(),
-                    employers = response.EasyAccess().GetAllEmployers()?.FirstOrDefault<dynamic>(),
-                    roles = response.EasyAccess().GetAllJobTitles()?.FirstOrDefault<dynamic>(),
-                    experience = response?.Value?.ResumeData?.EmploymentHistory?.Positions,
-                    degree = response.EasyAccess().GetHighestDegree()?.Name,
-                    contact = response.EasyAccess().GetContactInfo()?.Telephones?.FirstOrDefault<dynamic>(),
-                    address = response.EasyAccess().GetContactInfo()?.Location?.Regions?.FirstOrDefault<dynamic>(),
-                    skills = response?.Value?.ResumeData.Skills,
-                    education = response?.Value?.ResumeData?.Education
-                };
-
-                return res;
-            }
-            else
-            {
-                return new
-                {
-                    code = 500,
-                    message = "could not process the request"
-                };
-            }
-
-        }
-        catch (SovrenException e)
-        {
-            //the document could not be parsed, always try/catch for SovrenExceptions when using SovrenClient
-            Console.WriteLine($"Error: {e.SovrenErrorCode}, Message: {e.Message}");
-
-            return e.Message;
-        }
-    }
-    public async Task<MeetingDto> CreateMeeting(MeetingDto payload)
-    {
-
         HttpClient client = new();
 
-        var token = _config.GetValue<string>("Zoom:Token");
+        var accountId = _config.GetValue<string>("Zoom:Account_id");
+        var clientId = _config.GetValue<string>("zoom:Client_id");
+        var clientSecret = _config.GetValue<string>("zoom:Client_secret");
+
+        var payload = Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}");
+
+        string encodedPayload = Convert.ToBase64String(payload);
+
+        client.DefaultRequestHeaders.Add("authorization", "Basic" + $" {encodedPayload}");
+
+        using HttpResponseMessage response = await client.PostAsync(_config.GetValue<string>("Zoom:Token_url"), null);
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+
+        var jObject = JObject.Parse(jsonResponse);
+
+        var token = jObject.Value<string>("access_token");
+
+        return token;
+
+    }
+    public async Task<MeetingDto> CreateMeeting(MeetingDto payload, string token)
+    {
+        HttpClient client = new();
 
         client.DefaultRequestHeaders.Add("authorization", "bearer" + token);
 
@@ -343,16 +394,30 @@ public class CandidateRepository : ICandidateRepository
             LastName = payload.LastName
         };
 
-        Console.WriteLine(data.Date);
-
         return data;
     }
     public async Task StoreSessionInfo(MeetingDto payload)
     {
+        var body = new
+        {
+            meetingId = payload.MeetingId,
+            password = payload.Password,
+            participantId = payload.ParticipantId,
+            date = payload.Date,
+            time = payload.Time,
+            completed = payload.Completed,
+            link = payload.Link,
+            jobId = payload.JobId,
+            jobTitle = payload.JobTitle,
+            topic = payload.Topic,
+            firstname = payload.FirstName,
+            lastname = payload.LastName,
+            email = payload.Email
+        };
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        await connection.ExecuteAsync("Create_meeting", payload, commandType: CommandType.StoredProcedure);
+        await connection.ExecuteAsync("Create_meeting", body, commandType: CommandType.StoredProcedure);
     }
     public async Task<string> SendMail(EmailDto payload, CredentialsObj cred)
     {
@@ -390,13 +455,23 @@ public class CandidateRepository : ICandidateRepository
 
         return data;
     }
+    public async Task ResetPassword(PasswordResetDto payload)
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
+        await connection.ExecuteAsync("Reset_password", payload, commandType: CommandType.StoredProcedure);
+    }
     public async Task<IEnumerable<MeetingDto>> GetMeeting(MeetingDto payload)
     {
+        var body = new
+        {
+            time = payload.Time,
+            date = payload.Date
+        };
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<MeetingDto>("Get_meetings_by_time", payload, commandType: CommandType.StoredProcedure);
+        var data = await connection.QueryAsync<MeetingDto>("Get_meetings_by_time", body, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -410,11 +485,21 @@ public class CandidateRepository : ICandidateRepository
 
         if (payload.RoleId == "All")
         {
-            data = await connection.QueryAsync<CandidateModel>("Get_applications_by_stage", payload, commandType: CommandType.StoredProcedure);
+            var body = new
+            {
+                stage = payload.Stage
+            };
+            // data = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE roleid = @RoleId and stage = @Stage", payload);
+            data = await connection.QueryAsync<CandidateModel>("Get_applications_by_stage", body, commandType: CommandType.StoredProcedure);
         }
         else
         {
-            data = await connection.QueryAsync<CandidateModel>("Get_applications_by_stage_and_role", payload, commandType: CommandType.StoredProcedure);
+            var body = new
+            {
+                stage = payload.Stage,
+                roleId = payload.RoleId
+            };
+            data = await connection.QueryAsync<CandidateModel>("Get_applications_by_stage_and_role", body, commandType: CommandType.StoredProcedure);
         }
 
         return data;
@@ -561,69 +646,113 @@ public class CandidateRepository : ICandidateRepository
         return data;
     }
 
-    public async Task<int> ConfirmEmail(string email) {
+    public async Task<int> ConfirmEmail(string email)
+    {
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("Validate_email", new { Email = email}, commandType: CommandType.StoredProcedure);
+        var data = await connection.ExecuteAsync("Validate_email", new { Email = email }, commandType: CommandType.StoredProcedure);
 
         return data;
 
     }
-    public async Task CreateComment(CommentDto payload) {
+    public async Task CreateComment(CommentDto payload)
+    {
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         await connection.ExecuteAsync("Creates_comment", payload, commandType: CommandType.StoredProcedure);
     }
 
-    public async Task<IEnumerable<CommentDto>> GetComments(string id) {
+    public async Task<IEnumerable<CommentDto>> GetComments(string id)
+    {
 
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CommentDto>("Gets_comment_by_Application", new { Id = id}, commandType: CommandType.StoredProcedure);
+        var data = await connection.QueryAsync<CommentDto>("Gets_comment_by_Application", new { Id = id }, commandType: CommandType.StoredProcedure);
 
         return data;
     }
 
-    public async Task<dynamic> CreateTeamsMeeting() {
-                    // The client credentials flow requires that you request the
-            // /.default scope, and preconfigure your permissions on the
-            // app registration in Azure. An administrator must grant consent
-            // to those permissions beforehand.
-            var scopes = new[] { "https://graph.microsoft.com/.default" };
+    public async Task<dynamic> CreateTeamsMeeting()
+    {
+        // The client credentials flow requires that you request the
+        // /.default scope, and preconfigure your permissions on the
+        // app registration in Azure. An administrator must grant consent
+        // to those permissions beforehand.
+        var scopes = new[] { "https://graph.microsoft.com/.default" };
 
-            // Multi-tenant apps can use "common",
-            // single-tenant apps must use the tenant ID from the Azure portal
-            var tenantId = _config.GetValue<string>("Graph_api:tenant_id");
+        // Multi-tenant apps can use "common",
+        // single-tenant apps must use the tenant ID from the Azure portal
+        var tenantId = _config.GetValue<string>("Graph_api:tenant_id");
 
-            // Values from app registration
-            var clientId = _config.GetValue<string>("Graph_api:client_id");
-            var clientSecret = _config.GetValue<string>("Graph_api:client_secret");
+        // Values from app registration
+        var clientId = _config.GetValue<string>("Graph_api:client_id");
+        var clientSecret = _config.GetValue<string>("Graph_api:client_secret");
 
-            // using Azure.Identity;
-            var options = new TokenCredentialOptions
-            {
-                AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
+        // using Azure.Identity;
+        var options = new TokenCredentialOptions
+        {
+            AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
+        };
+
+        // https://learn.microsoft.com/dotnet/api/azure.identity.clientsecretcredential
+        var clientSecretCredential = new ClientSecretCredential(
+            tenantId, clientId, clientSecret, options);
+
+        var graphClient = new GraphServiceClient(clientSecretCredential, scopes);
+
+        var requestBody = new OnlineMeeting
+        {
+            StartDateTime = DateTimeOffset.Parse("2023-05-26T15:05:34.2444915-07:00"),
+            EndDateTime = DateTimeOffset.Parse("2023-05-26T15:20:34.2464912-07:00"),
+            Subject = "User Token Meeting",
+        };
+
+        var result = await graphClient.Me.OnlineMeetings.PostAsync(requestBody);
+
+        Console.WriteLine(result);
+
+        return result;
+    }
+
+    public async Task<IEnumerable<MeetingDto>> CheckMeetingStatus(string id)
+    {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<MeetingDto>("check_meetings", new { Id = id }, commandType: CommandType.StoredProcedure);
+
+        return data;
+    }
+
+    public dynamic SendOfferMail(HireDto payload)
+    {
+
+        object[] items = {
+                new DocFields { Key = "{{position}}", Value = payload.Position},
+                new DocFields { Key = "{{firstname lastname}}", Value = $"{payload.FirstName} {payload.LastName}"},
+                new DocFields { Key = "{{address}}", Value = payload.Address},
+                new DocFields { Key = "{{reports_to}}", Value = payload.ReportTo},
+                new DocFields { Key = "{{state}}", Value = payload.City},
+                new DocFields { Key = "{{salary}}", Value = payload.Salary},
+                new DocFields { Key = "{location}}", Value = payload.Location},
+                new DocFields { Key = "{{firstname}}", Value = payload.FirstName},
+                new DocFields { Key = "{{lastname}}", Value = payload.LastName},
+                new DocFields { Key = "{{date}}", Value = payload.Date.ToString().Split(" ")[0]},
+                new DocFields { Key = "{{rank}}", Value = payload.Rank},
+                new DocFields { Key = "{{start_date}}", Value = payload.StartDate.ToString().Split(" ")[0]},
+                new DocFields { Key = "{{salwords}}", Value = payload.SalWords},
             };
 
-            // https://learn.microsoft.com/dotnet/api/azure.identity.clientsecretcredential
-            var clientSecretCredential = new ClientSecretCredential(
-                tenantId, clientId, clientSecret, options);
+            Document doc = new();
+            doc.LoadFromFile(@"wwwroot/templates/offer.docx");
 
-            var graphClient = new GraphServiceClient(clientSecretCredential, scopes);
+            foreach(DocFields item in items) {
+                doc.Replace(item.Key, item.Value, true, true);
+            }
+            doc.SaveToFile(@"wwwroot/templates/letter.pdf", FileFormat.PDF);  
 
-            var requestBody = new OnlineMeeting
-            {
-                StartDateTime = DateTimeOffset.Parse("2023-05-26T15:05:34.2444915-07:00"),
-                EndDateTime = DateTimeOffset.Parse("2023-05-26T15:20:34.2464912-07:00"),
-                Subject = "User Token Meeting",
-            };
-
-            var result = await graphClient.Me.OnlineMeetings.PostAsync(requestBody);
-
-            Console.WriteLine(result);
-
-            return result;
+        return "Successful";
     }
 }

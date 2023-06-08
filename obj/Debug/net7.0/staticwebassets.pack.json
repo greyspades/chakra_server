@@ -1,44 +1,12 @@
 {
   "Files": [
     {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\07e67f34-2b2e-4150-ba2b-e61a36bf8bab.docx",
-      "PackagePath": "staticwebassets\\cv\\07e67f34-2b2e-4150-ba2b-e61a36bf8bab.docx"
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\templates\\letter.pdf",
+      "PackagePath": "staticwebassets\\templates\\letter.pdf"
     },
     {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\1b91ff0e-06f4-4ed9-8f30-747f0091890a.docx",
-      "PackagePath": "staticwebassets\\cv\\1b91ff0e-06f4-4ed9-8f30-747f0091890a.docx"
-    },
-    {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\261f9d4c-c062-4ce6-8736-6825bfc2d20c.docx",
-      "PackagePath": "staticwebassets\\cv\\261f9d4c-c062-4ce6-8736-6825bfc2d20c.docx"
-    },
-    {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\27cc34c0-dd59-4269-a083-a5d1851d3aaa.docx",
-      "PackagePath": "staticwebassets\\cv\\27cc34c0-dd59-4269-a083-a5d1851d3aaa.docx"
-    },
-    {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\3daa4d60-0cf6-4eef-af09-7c45319dfc7c.docx",
-      "PackagePath": "staticwebassets\\cv\\3daa4d60-0cf6-4eef-af09-7c45319dfc7c.docx"
-    },
-    {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\4fe3a3b1-f787-49e9-ac87-5d482ba6b432.docx",
-      "PackagePath": "staticwebassets\\cv\\4fe3a3b1-f787-49e9-ac87-5d482ba6b432.docx"
-    },
-    {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\57528fca-23c6-438b-b1cf-e6381035e7b0.docx",
-      "PackagePath": "staticwebassets\\cv\\57528fca-23c6-438b-b1cf-e6381035e7b0.docx"
-    },
-    {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\7e4fc820-30dd-4d08-85b1-93f338a7f683.pdf",
-      "PackagePath": "staticwebassets\\cv\\7e4fc820-30dd-4d08-85b1-93f338a7f683.pdf"
-    },
-    {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\ae450a9c-57c2-4518-8d89-6bcacda2ec75.docx",
-      "PackagePath": "staticwebassets\\cv\\ae450a9c-57c2-4518-8d89-6bcacda2ec75.docx"
-    },
-    {
-      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\cv\\db0e7f22-aab0-4f98-8f51-f1716457a526.docx",
-      "PackagePath": "staticwebassets\\cv\\db0e7f22-aab0-4f98-8f51-f1716457a526.docx"
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\templates\\offer.docx",
+      "PackagePath": "staticwebassets\\templates\\offer.docx"
     },
     {
       "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.Recruitment_portal.Microsoft.AspNetCore.StaticWebAssets.props",

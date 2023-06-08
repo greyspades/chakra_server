@@ -71,6 +71,18 @@ public class CandidateData {
 
 public class HireDto {
     public string? Id { get; set; }
+    public string? Location { get; set; }
+    public string? Position { get; set; }
+    public string? Rank { get; set; }
+    public DateTime? StartDate { get; set; }
+    public string? ReportTo { get; set; }
+    public DateTime? Date { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? City { get; set; }
+    public string? Salary { get; set; }
+    public string? Address { get; set; }
+    public string? SalWords { get; set; }
 }
 
 public class SignInDto {
@@ -179,4 +191,36 @@ public class CommentDto {
     public string? LastName { get; set; }
     public DateTime? Date { get; set; }
     public string? Comment { get; set; }
+}
+
+public class CandidateEmailDto {
+    public string? Email { get; set; }
+}
+
+public class PasswordResetDto {
+    public string? Password { get; set; }
+    public string? Email { get; set; }
+}
+public class PasswordResetFields {
+    public string? FirstName { get; set; }
+    public string? Link { get; set; }
+}
+
+public class OfferMailDto {
+    public string? Location { get; set; }
+    public string? Position { get; set; }
+    public string? Rank { get; set; }
+    public DateTime? StartDate { get; set; }
+    public string? ReportTo { get; set; }
+    public DateTime? Date { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? City { get; set; }
+    public string? Salary { get; set; }
+    public string? SalWords { get; set; }
+}
+
+public class DocFields {
+    public string? Key { get; set; }
+    public string? Value { get; set; }
 }

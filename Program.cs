@@ -9,6 +9,7 @@ using Cron.Handler;
 using Quartz;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Jobrole.Repository;
+using TimedBackgroundTasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,34 +19,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
+builder.Services.AddHostedService<TimedHostedService>();
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
 
-builder.Services.Configure<ResumeDbSettings>(
-    builder.Configuration.GetSection("ResumeDatabase"));
+// builder.Services.Configure<ResumeDbSettings>(
+//     builder.Configuration.GetSection("ResumeDatabase"));
 
 var Configuration = builder.Configuration;
-
-builder.Services.AddQuartz(q =>
-{
-    q.UseMicrosoftDependencyInjectionJobFactory();
-    var jobKey = new JobKey("Contract");
-    q.AddJob<LasmService>(opts => opts.WithIdentity(jobKey));
-
-    q.AddTrigger(opts => opts
-        .ForJob(jobKey)
-        .WithIdentity("renewal")
-        // .WithCronSchedule("* */5 * * * ?"))
-        .WithSimpleSchedule(a => a.WithIntervalInMinutes(28).RepeatForever()));
-});
-
-builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-
-// builder.Services.AddMicrosoftIdentityWebAppAuthentication(Configuration)
-//         .EnableTokenAcquisitionToCallDownstreamApi()
-//         .AddMicrosoftGraph("https://graph.microsoft.com/beta", scopes)
-//         .AddInMemoryTokenCaches();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -101,6 +83,15 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
+{
+    app.UseCookiePolicy();
+    app.UseAuthorization();
+    app.UseAuthentication();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.MapControllers();
+}
+if (app.Environment.IsProduction())
 {
     app.UseCookiePolicy();
     app.UseAuthorization();

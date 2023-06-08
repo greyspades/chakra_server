@@ -17,11 +17,11 @@ namespace Candidate.Interface
        public Task<string> UpdateData(UpdateEmail payload);
        public Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string Id);
        public Task<string> UpdateStage(UpdateRole payload);
-       public Task<string> CancelApplication(CancelApplication id);
+       public Task<string> CancelApplication(string id);
        public Task<IEnumerable<CandidateModel>> GetStatus(GetStatusDto payload);
-       public Task<IEnumerable<BasicInfo>> CheckEmail(BasicInfo payload);
+       public Task<IEnumerable<BasicInfo>> CheckEmail(string email);
        public Task<dynamic> ParseCvAsync(IFormFile formFile, Guid id);
-       public Task<dynamic> ParseCvData(IFormFile cv);
+    //    public Task<dynamic> ParseCvData(IFormFile cv);
        public Task<byte[]> GetBytes(IFormFile formFile);
        public Task<IEnumerable<string>> GetSkills(string id);
        public Task<IEnumerable<string>> GetCandidateBySkills(SkillsInput payload);
@@ -29,7 +29,7 @@ namespace Candidate.Interface
        public Task<IEnumerable<CandidateModel>> GetByFlag(CandidateByFlagDto payload);
        public Task<string> HireCandidate(HireDto payload);
        public Task<CredentialsObj> GetCredentials();
-       public Task<MeetingDto> CreateMeeting(MeetingDto payload);
+       public Task<MeetingDto> CreateMeeting(MeetingDto payload, string token);
        public Task<string> SendMail(EmailDto payload, CredentialsObj cred);
        public Task StoreSessionInfo(MeetingDto payload);
        public Task<IEnumerable<MeetingDto>> GetMeetings();
@@ -45,6 +45,9 @@ namespace Candidate.Interface
        public Task CreateComment(CommentDto payload);
        public Task<IEnumerable<CommentDto>> GetComments(string id);
        public Task<dynamic> CreateTeamsMeeting();
-    //    public Task<IEnumerable<MeetingDto>> GetMeetings();
+       public Task<string> CreateMeetingToken();
+       public Task ResetPassword(PasswordResetDto payload);
+       public Task<IEnumerable<MeetingDto>> CheckMeetingStatus(string id);
+       public dynamic SendOfferMail(HireDto payload);
     }
 }
