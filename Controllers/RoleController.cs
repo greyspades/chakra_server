@@ -31,11 +31,16 @@ public class RoleController : ControllerBase
     }
 
     // [EnableCors("Policy1")]
-    [HttpGet]
-    public async Task<ActionResult> GetRoles()
+    [HttpPost("all")]
+    public async Task<ActionResult> GetRoles(JobRoleDto payload)
     {
-
         var data = await _repo.GetRoles();
+
+            // var data = await _repo.GetJobRoles();
+            List<JobRoleModel> dataList = (List<JobRoleModel>)data;
+
+            data = dataList.FindAll((item) => item.Name.ToLower().Contains(payload.Value.ToLower()));
+
 
         var response = new
         {
@@ -55,7 +60,6 @@ public class RoleController : ControllerBase
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
             var duplicate = await _repo.GetJobByCode(payload.Code);
-
 
             if(!duplicate.Any()) {
                 payload.Id = guid.ToString();

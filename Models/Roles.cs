@@ -16,6 +16,8 @@ public class JobRoleModel
     [Required]
     public string? Code { get; set; }
     public string? Location { get; set; }
+    public string? Skills { get; set; }
+    public string? Qualification { get; set; }
 }
 
 public class Job {
@@ -32,5 +34,4 @@ public class JobRoleDto {
     public string? Id { get; set; }
     public string? Code { get; set; }
     public string? Value { get; set; }
-
 }
