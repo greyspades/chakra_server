@@ -6,19 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Data;
-using System.Drawing.Printing;
-using Sovren;
-using Sovren.Models;
-using Sovren.Models.API.Parsing;
-using MongoDB.Driver;
-using AsposeDoc = global::Aspose.Words;
-using MimeKit;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit.Text;
-using Quartz.Impl.Matchers;
-using Credentials.Models;
-using System.Text.Json;
 using System.Text;
 using System.Text.Json.Nodes;
 using Newtonsoft.Json.Linq;
@@ -30,6 +17,8 @@ using System.Net.Mime;
 using Meetings.Models;
 using Roles.Models;
 using JobRole.Interface;
+using System.Text.Json;
+// using Newtonsoft.Json;
 
 namespace Jobrole.Repository;
 
@@ -199,7 +188,16 @@ public class JobRoleRepository: IJobRoleRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
+
         await connection.ExecuteAsync("Create_job_role", payload, commandType: CommandType.StoredProcedure);
+
+        // if (payload.Skills != null)
+        // {
+        //     for (int i = 0; i < payload.Skills.Count; i++)
+        //     {
+        //         await connection.ExecuteAsync("Add_skills", new { Item = payload.Skills[i], Xid = payload.Id, Unit = payload.RoleId }, commandType: CommandType.StoredProcedure);
+        //     };
+        // }
     }
     public async Task<JobRoleModel> GetJobRoleById(string id)
     {
@@ -217,5 +215,11 @@ public class JobRoleRepository: IJobRoleRepository
         var data = await connection.QueryAsync<JobRoleModel>("Get_jobrole_by_unit", new { Unit = unit }, commandType: CommandType.StoredProcedure);
 
         return data.First();
+    }
+    
+    public async Task ChangeJobStatus(Job payload) {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.ExecuteAsync("ChangeJobStatus", new { payload.Code, Status = payload.Item }, commandType: CommandType.StoredProcedure);
     }
 }

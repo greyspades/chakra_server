@@ -5,8 +5,6 @@ using Microsoft.AspNetCore;
 using Candidate.Repository;
 using Microsoft.Extensions.FileProviders;
 using Resume.Models;
-using Cron.Handler;
-using Quartz;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Jobrole.Repository;
 using TimedBackgroundTasks;

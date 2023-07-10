@@ -12,10 +12,12 @@ public class JobRoleModel
     public string? Description { get; set; }
     public int? Experience { get; set; }
     public DateTime? Deadline { get; set; }
-    public string? Unit { get; set; }
     [Required]
     public string? Code { get; set; }
     public string? Location { get; set; }
+    public string? Skills { get; set; }
+    public string? Qualification { get; set; }
+    public string? JobType { get; set; }
 }
 
 public class Job {
@@ -32,5 +34,11 @@ public class JobRoleDto {
     public string? Id { get; set; }
     public string? Code { get; set; }
     public string? Value { get; set; }
+}
 
+public class JobSearchDto {
+    public string? Value { get; set; }
+    public string? Filter { get; set; }
+    public int? Page { get; set; }
+    public string? FilterType { get; set; }
 }

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "5vZksE+5tg/7wzfM58Y2dY3UcaWno9YQRjZIrMWOcO0=",
+  "Hash": "AUspOdZBGtZB0SvV9EfG6blsfC2tXWfAKQW/gxeiWiI=",
   "Source": "Recruitment_portal",
   "BasePath": "_content/Recruitment_portal",
   "Mode": "Default",
@@ -49,6 +49,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\templates\\offer.docx"
+    },
+    {
+      "Identity": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\templates\\offer2.docx",
+      "SourceId": "Recruitment_portal",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\",
+      "BasePath": "_content/Recruitment_portal",
+      "RelativePath": "templates/offer2.docx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\templates\\offer2.docx"
     }
   ]
 }

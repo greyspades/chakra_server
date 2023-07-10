@@ -51,19 +51,34 @@ public class CandidateController : ControllerBase
         // _mongoDb = mongoDatabase;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<List<CandidateModel>>> GetCandidates()
+    [HttpPost]
+    public async Task<ActionResult<List<CandidateModel>>> GetCandidates(GetCandidatesDto payload)
     {
         try
         {
             var data = await _repo.GetCandidates();
 
-            return Ok(data);
+            var count = payload.Page * 10;
+            
+            var slicedCandidates = data.Skip((int)count!).Take((int)payload.Take!);
+
+            var response = new
+            {
+                code = 200,
+                data = slicedCandidates,
+                count = data.Count()
+            };
+
+            return Ok(response);
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return StatusCode(500, e.Message);
+             var response = new {
+                code = 500,
+                message = "Unnable to proceed with your request"
+             };
+            return StatusCode(500, response);
         }
     }
 
@@ -135,6 +150,10 @@ public class CandidateController : ControllerBase
                     payload.ApplDate = DateTime.Now;
                     payload.Stage = "1";
                     payload.Status = "Pending";
+                    payload.MaritalStatus = info.First().MaritalStatus;
+                    payload.Address = info.First().Address;
+                    // payload.State = info.First().State;
+                    // payload.Lga = info.First().Lga;
 
                     var data = await _repo.CreateCandidate(payload);
 
@@ -299,7 +318,7 @@ public class CandidateController : ControllerBase
             {
                 code = 200,
                 message = "Successfull",
-                data
+                data,
             };
 
             return Ok(response);
@@ -345,20 +364,38 @@ public class CandidateController : ControllerBase
             var basicInfo = basic.First();
             
             if(canData.TempId == null) {
-
-                // var data = await _repo.HireCandidate(payload);
-
+                
                 payload.Address = basicInfo.Address;
                 payload.FirstName = canData.FirstName;
                 payload.LastName = canData.LastName;
                 payload.Position = canData.JobName;
 
-                var mail = _repo.SendOfferMail(payload);
+                _repo.CreateOfferMail(payload);
+
+                if(payload.SendMail == true) {
+                    var mailObj = new EmailDto {
+                    Firstname = canData.FirstName,
+                    EmailAddress = canData.Email,
+                    Subject = $"Your application for {canData.JobName} at LAPO Microfinance Bank",
+                    HasFile = "Yes",
+                    Body = HTMLHelper.Acceptance(canData)
+                    };
+                    CredentialsObj cred = await _repo.GetCredentials();
+
+                    var mail = await _repo.SendMail(mailObj, cred);
+
+                    Console.WriteLine(mail);
+
+                    // await _repo.HireCandidate(payload);
+
+                    using StreamWriter outputFile = new("tokenlogs.txt", true);
+
+                    await outputFile.WriteAsync(mail);
+                }
 
                 var response = new {
-                code = 200,
-                message = "Candidate has been hired successfully",
-                mail
+                    code = 200,
+                    message = "Candidate has been hired successfully",
                 };
 
                 return Ok(response);
@@ -373,8 +410,18 @@ public class CandidateController : ControllerBase
             }
         }
         catch (Exception e) {
-            Console.WriteLine(e.Message);
-            return StatusCode(500, e.Message);
+            Console.WriteLine(value: e.Message);
+
+            using StreamWriter outputFile = new("tokenlogs.txt", true);
+
+            await outputFile.WriteAsync(e.Message);
+
+            var result = new {
+                code = 500,
+                message = "Unnable to process your request"
+            };
+
+            return StatusCode(500, result);
         }
     }
 
@@ -387,7 +434,7 @@ public class CandidateController : ControllerBase
             if (cv != null)
             {
                 var data = await _repo.ParseCvAsync(cv, guid);
-                // var cvMetaData = await _repo.ParseCvData(cv);
+
                 var response = new
                 {
                     code = 200,
@@ -468,7 +515,17 @@ public class CandidateController : ControllerBase
     {
         try
         {
-            var data = await _repo.GetCandidatesByRole(payload.Id);
+            IEnumerable<CandidateModel> data;
+            if(payload.Id != null && payload.Id != "") {
+                data = await _repo.GetCandidatesByRole(payload.Id);
+            } else {
+                data = await _repo.GetCandidates();
+            }
+
+            var result = new {
+                code = 200,
+                message = "you "
+            };
 
             var count = payload.Page * 10;
             
@@ -579,8 +636,11 @@ public class CandidateController : ControllerBase
 
                     var encryptedEmail = AEShandler.Encrypt(payload.Email, _config.GetValue<string>("Encryption:Key"), _config.GetValue<string>("Encryption:Iv"));
 
+                    // Console.WriteLine(encryptedEmail);
+                    // Console.WriteLine($"localhost:8089/password_reset?email={encryptedEmail}&token=00727143910");
+
                     var resetObj = new PasswordResetFields {
-                        Link = AEShandler.Encrypt($"localhost:3000/password_reset?email={encryptedEmail}&token=00727143910", _config.GetValue<string>("Encryption:Key"), _config.GetValue<string>("Encryption:Iv")),
+                        Email = encryptedEmail,
                         FirstName = candidate.First().FirstName
                     };
 
@@ -614,22 +674,32 @@ public class CandidateController : ControllerBase
             
         }
         catch(Exception e) {
-            Console.WriteLine(e.Message);
-            var response = new {
+            Console.WriteLine(value: e.Message);
+
+            using StreamWriter outputFile = new("tokenlogs.txt", true);
+
+            await outputFile.WriteAsync(e.Message);
+
+            var result = new {
                 code = 500,
-                message = "Sorry an error occured processing your request"
+                message = "Unnable to process your request"
             };
-            
-            return StatusCode(500, response);
+
+            return StatusCode(500, result);
         }
     }
 
     [HttpPost("reset_password")]
     public async Task<ActionResult> ResetPassword(PasswordResetDto payload) {
         try {
+            payload.Email = AEShandler.Decrypt(payload.Email, _config.GetValue<string>("Encryption:Key"), _config.GetValue<string>("Encryption:Iv"));
+
             var mail = await _repo.CheckEmail(payload.Email);
+
             if(mail.Any()) {
-                
+                Console.WriteLine(payload.Email);
+                payload.Password = BC.HashPassword(payload.Password);
+
                 await _repo.ResetPassword(payload);
 
                 var response = new {
@@ -637,27 +707,31 @@ public class CandidateController : ControllerBase
                     message = "Your password has been updated successfully"
                 };
 
-            return Ok(response);
+                return Ok(response);
             } else {
                 var response = new {
                     code = 404,
                     message = "Sorry that email address does not exist on our records"
                 };
 
-            return Ok(response);
+                return Ok(response);
             }
         }
         catch(Exception e) {
-            Console.WriteLine(e.Message);
-            var response = new {
+            Console.WriteLine(value: e.Message);
+
+            using StreamWriter outputFile = new("tokenlogs.txt", true);
+
+            await outputFile.WriteAsync(e.Message);
+
+            var result = new {
                 code = 500,
-                message = "Sorry could not process your request"
+                message = "Unnable to process your request"
             };
 
-            return StatusCode(500, response);
+            return StatusCode(500, result);
         }
     }
-
 
     [HttpGet("resume/{id}")]
     public ActionResult<dynamic> GetResume(string id)
@@ -677,17 +751,22 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpGet("meetings")]
-    public async Task<ActionResult<MeetingDto>> GetMeetings()
+    [HttpPost("meetings")]
+    public async Task<ActionResult<MeetingDto>> GetMeetings(GetCandidatesDto payload)
     {
         try
         {
-            var data = await _repo.GetMeetings();
+            var data = await _repo.GetMeetings(payload.Id);
+
+            var count = payload.Page * 10;
+            
+            var slicedMeetings = data.Skip((int)count!).Take((int)payload.Take!);
 
             var response = new {
                 code = 200,
                 message = "Success",
-                data
+                count = data.Count(),
+                data = slicedMeetings
             };
 
             return Ok(response);
@@ -774,17 +853,29 @@ public class CandidateController : ControllerBase
         try {
             var data = await _repo.GetCandidateByStage(payload);
 
+            var count = payload.Page * 10;
+            
+            var slicedCandidates = data.Skip((int)count!).Take((int)payload.Take!);
+
             var response = new {
                 code = 200,
                 message = "Successful",
-                data
+                count = data.Count(),
+                data = slicedCandidates
             };
 
             return Ok(response);
         }
         catch(Exception e) {
             Console.WriteLine(e.Message);
-            return StatusCode(500, e.Message);
+            using StreamWriter outputFile = new("tokenlogs.txt", true);
+            await outputFile.WriteAsync(e.Message);
+            
+            var response = new {
+                code = 500,
+                message = "Unnable to process your request"
+            };
+            return StatusCode(500, response);
         }
     }
 
@@ -851,7 +942,6 @@ public class CandidateController : ControllerBase
             
             payload.Email = AEShandler.Encrypt(payload.Email, _config.GetValue<string>("Encryption:Key"), _config.GetValue<string>("Encryption:Iv"));
 
-
                     var mailObj = new EmailDto {
                         Firstname = payload.FirstName,
                         EmailAddress = emailAddress,
@@ -861,6 +951,8 @@ public class CandidateController : ControllerBase
                     };
     
                     var mail = await _repo.SendMail(mailObj, cred);
+
+                    Console.WriteLine(mail);
 
             var response = new {
                 code = 200,
@@ -940,6 +1032,8 @@ public class CandidateController : ControllerBase
                 };
 
                 Response.Cookies.Append("SomeCookie", "SomeValue", cookieOptions);
+
+                data.First().Password = null;
 
                 var response = new {
                 code = 200,
@@ -1030,13 +1124,18 @@ public class CandidateController : ControllerBase
             }
         }
         catch(Exception e) {
-            Console.WriteLine(e.Message);
-            var response = new {
+            Console.WriteLine(value: e.Message);
+
+            using StreamWriter outputFile = new("tokenlogs.txt", true);
+
+            await outputFile.WriteAsync(e.Message);
+
+            var result = new {
                 code = 500,
-                message = "Unnable to process this request",
+                message = "Unnable to process your request"
             };
 
-            return StatusCode(500, response);
+            return StatusCode(500, result);
         }
     }
     [HttpPost("signout")]
@@ -1131,20 +1230,20 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [HttpPost("pdf")]
-    public ActionResult ParsePdf(HireDto payload)
-    {
-        try
-        {
-            var data = _repo.SendOfferMail(payload);
+    // [HttpPost("pdf")]
+    // public ActionResult ParsePdf(HireDto payload)
+    // {
+    //     try
+    //     {
+    //         var data = _repo.SendOfferMail(payload);
 
-            return Ok(data);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
+    //         return Ok(data);
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e.Message);
 
-            return StatusCode(500, e.Message);
-        }
-    }
+    //         return StatusCode(500, e.Message);
+    //     }
+    // }
 }

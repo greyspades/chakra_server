@@ -9,6 +9,10 @@
       "PackagePath": "staticwebassets\\templates\\offer.docx"
     },
     {
+      "Id": "C:\\Users\\LAPO Mfb\\development\\Recruitment_portal\\wwwroot\\templates\\offer2.docx",
+      "PackagePath": "staticwebassets\\templates\\offer2.docx"
+    },
+    {
       "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.Recruitment_portal.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

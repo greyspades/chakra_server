@@ -32,7 +32,7 @@ namespace Candidate.Interface
        public Task<MeetingDto> CreateMeeting(MeetingDto payload, string token);
        public Task<string> SendMail(EmailDto payload, CredentialsObj cred);
        public Task StoreSessionInfo(MeetingDto payload);
-       public Task<IEnumerable<MeetingDto>> GetMeetings();
+       public Task<IEnumerable<MeetingDto>> GetMeetings(string id);
        public Task<IEnumerable<CandidateModel>> CheckCandidate(CandidateModel payload);
        public Task<IEnumerable<MeetingDto>> GetMeeting(MeetingDto payload);
        public Task<IEnumerable<CandidateModel>> GetCandidateByStage(StageDto payload);
@@ -48,6 +48,6 @@ namespace Candidate.Interface
        public Task<string> CreateMeetingToken();
        public Task ResetPassword(PasswordResetDto payload);
        public Task<IEnumerable<MeetingDto>> CheckMeetingStatus(string id);
-       public dynamic SendOfferMail(HireDto payload);
+       public dynamic CreateOfferMail(HireDto payload);
     }
 }

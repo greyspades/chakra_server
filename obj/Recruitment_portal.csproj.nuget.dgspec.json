@@ -40,14 +40,6 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
-            "Aspose.PDF": {
-              "target": "Package",
-              "version": "[23.5.0, )"
-            },
-            "Aspose.Words": {
-              "target": "Package",
-              "version": "[23.3.0, )"
-            },
             "BCrypt.Net-Next": {
               "target": "Package",
               "version": "[4.0.3, )"
@@ -96,33 +88,17 @@
               "target": "Package",
               "version": "[5.10.0, )"
             },
-            "MongoDB.Driver": {
+            "Microsoft.Office.Interop.Word": {
               "target": "Package",
-              "version": "[2.19.0, )"
-            },
-            "MongoDB.Driver.GridFS": {
-              "target": "Package",
-              "version": "[2.19.0, )"
-            },
-            "MongoDBQueue.Legacy": {
-              "target": "Package",
-              "version": "[1.2.3.2, )"
+              "version": "[15.0.4797.1004, )"
             },
             "NETCore.Encrypt": {
               "target": "Package",
               "version": "[2.1.1, )"
             },
-            "PdfSharp": {
+            "RestSharp": {
               "target": "Package",
-              "version": "[1.50.5147, )"
-            },
-            "Quartz": {
-              "target": "Package",
-              "version": "[3.6.2, )"
-            },
-            "Quartz.Extensions.Hosting": {
-              "target": "Package",
-              "version": "[3.6.2, )"
+              "version": "[110.2.0, )"
             },
             "Sgbj.Cron.CronTimer": {
               "target": "Package",
@@ -135,6 +111,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.4.0, )"
+            },
+            "sautinsoft.document": {
+              "target": "Package",
+              "version": "[2023.4.19, )"
             }
           },
           "imports": [

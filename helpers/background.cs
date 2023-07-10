@@ -38,14 +38,14 @@ public class TimedHostedService : BackgroundService
     // Could also be a async method, that can be awaited in ExecuteAsync above
     private async void DoWork()
     {
-        // var cred = new CredHandler(_config);
+        var cred = new CredHandler(_config);
 
-        // await cred.Renew();
+        await cred.Renew();
         
         // using StreamWriter outputFile = new("tokenlogs.txt", true);
 
         // await outputFile.WriteAsync("did work");
 
-        // Console.WriteLine("job ran");
+        Console.WriteLine("job ran");
     }
 }

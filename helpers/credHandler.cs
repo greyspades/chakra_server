@@ -54,9 +54,11 @@ public class CredHandler
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
 
-            using StreamWriter outputFile = new("tokenlogs.txt", true);
+            // Console.WriteLine(jsonResponse);
 
-            await outputFile.WriteAsync(jsonResponse);
+            // using StreamWriter outputFile = new("tokenlogs.txt", true);
+
+            // await outputFile.WriteAsync(jsonResponse);
 
             var jsonObject = JObject.Parse(jsonResponse);
 

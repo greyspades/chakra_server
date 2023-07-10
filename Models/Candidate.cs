@@ -1,6 +1,5 @@
 
 using System.ComponentModel.DataAnnotations;
-using MongoDB.Driver;
 
 namespace Candidate.Models;
 
@@ -24,6 +23,8 @@ public class BasicInfo {
     public string? OtherName { get; set; }
     public string? Gender { get; set; }
     public string? EmailValid { get; set; }
+    public string? State { get; set; }
+    public string? Lga { get; set; }
 }
 
 public class CandidateModel
@@ -62,6 +63,8 @@ public class CandidateModel
     public string? Address { get; set; }
     public string? MaritalStatus { get; set; }
     public string? EmailValid { get; set; }
+    public string? State { get; set; }
+    public string? Lga { get; set; }
 }
 
 public class CandidateData {
@@ -83,6 +86,8 @@ public class HireDto {
     public string? Salary { get; set; }
     public string? Address { get; set; }
     public string? SalWords { get; set; }
+    public string? JobType { get; set; }
+    public bool? SendMail { get; set; }
 }
 
 public class SignInDto {
@@ -97,9 +102,9 @@ public class EmailDto {
     public string? EmailAddress { get; set; }
     public string? Body { get; set; }
     public string? HasFile { get; set; }
-    public string? MeetingLink { get; set; }
-    public string? MeetingId { get; set; }
-    public string? MeetingPassCode { get; set; }
+    // public string? MeetingLink { get; set; }
+    // public string? MeetingId { get; set; }
+    // public string? MeetingPassCode { get; set; }
 }
 
 public class CandidateByFlagDto {
@@ -168,6 +173,8 @@ public class MeetingDto {
 public class StageDto {
     public string? Stage { get; set; }
     public string? RoleId { get; set; }
+    public int? Page { get; set; }
+    public int? Take { get; set; }
 }
 
 public class AdminDto {
@@ -203,7 +210,7 @@ public class PasswordResetDto {
 }
 public class PasswordResetFields {
     public string? FirstName { get; set; }
-    public string? Link { get; set; }
+    public string? Email { get; set; }
 }
 
 public class OfferMailDto {

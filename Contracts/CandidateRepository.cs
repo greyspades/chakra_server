@@ -1,40 +1,26 @@
-using Recruitment.Context;
 using Candidate.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Dapper;
 using System.Data;
-using System.Drawing.Printing;
-// using Sovren;
-// using Sovren.Models;
-// using Sovren.Models.API.Parsing;
-using MongoDB.Driver;
-using AsposeDoc = global::Aspose.Words;
-using MimeKit;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit.Text;
-using Quartz.Impl.Matchers;
 using Credentials.Models;
 using System.Text.Json;
 using System.Text;
-using System.Text.Json.Nodes;
 using Newtonsoft.Json.Linq;
-using Microsoft.Extensions.Localization;
 using AES;
-using HTML;
 using CredentialsHandler;
 using System.Net.Mime;
-using Meetings.Models;
 using Roles.Models;
-using System.Collections;
-using System.Security.Policy;
 using Azure.Identity;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Candidate.Interface;
 using Spire.Doc;
+using RestSharp;
+using Pdf.Helper;
+using SautinSoft.Document;
+// using Microsoft.Office.Interop.Word;
+// using Microsoft.Office.Interop.Word;
+// using Word = Microsoft.Office.Interop.Word;
 // using AsposePdf = global::Aspose.Pdf;
 // using Aspose.Pdf.Text;
 // using System.Reflection.Metadata;
@@ -94,7 +80,8 @@ public class CandidateRepository : ICandidateRepository
             coverletter = payload.CoverLetter,
             gender = payload.Gender,
             othername = payload.OtherName,
-            // address = payload.Address
+            address = payload.Address,
+            maritalStatus = payload.MaritalStatus,
         };
 
         await connection.ExecuteAsync("Create_application", body, commandType: CommandType.StoredProcedure);
@@ -103,7 +90,7 @@ public class CandidateRepository : ICandidateRepository
         {
             for (int i = 0; i < payload?.Skills.Count; i++)
             {
-                await connection.ExecuteAsync("Add_skills", new { Item = payload.Skills[i], Xid = payload.Id, Unit = payload.RoleId }, commandType: CommandType.StoredProcedure);
+                await connection.ExecuteAsync("Add_skills", new { Item = payload.Skills[i], Xid = payload.Id}, commandType: CommandType.StoredProcedure);
             };
         }
 
@@ -155,8 +142,6 @@ public class CandidateRepository : ICandidateRepository
         var summation = int.Parse(currentId.FirstOrDefault()!) + 1;
 
         var tempId = summation.ToString().PadLeft(5, '0');
-
-        Console.WriteLine(tempId);
 
         await connection.ExecuteAsync("Set_temp_id", new { Id = payload.Id, TempId = tempId }, commandType: CommandType.StoredProcedure);
 
@@ -210,7 +195,15 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("Get_application_by_flag", payload, commandType: CommandType.StoredProcedure);
+        IEnumerable<CandidateModel> data;
+
+        if(payload.RoleId != "") {
+            Console.WriteLine("its by role");
+            data = await connection.QueryAsync<CandidateModel>("Get_application_by_flag", payload, commandType: CommandType.StoredProcedure);
+        } else {
+            Console.WriteLine("all applications");
+            data = await connection.QueryAsync<CandidateModel>("Get_all_applications_by_flag", new { payload.Flag }, commandType: CommandType.StoredProcedure);
+        }
 
         return data;
     }
@@ -230,12 +223,12 @@ public class CandidateRepository : ICandidateRepository
         {
             await formFile.CopyToAsync(stream);
         }
-        if (extension != ".pdf")
-        {
-            var doc = new AsposeDoc.Document(path);
-            doc.Save($"C:/Users/LAPO Mfb/Desktop/cv/{guid}..pdf");
-            File.Delete(path);
-        }
+        // if (extension != ".pdf")
+        // {
+        //     var doc = new AsposeDoc.Document(path);
+        //     doc.Save($"C:/Users/LAPO Mfb/Desktop/cv/{guid}..pdf");
+        //     File.Delete(path);
+        // }
 
         return fileData;
     }
@@ -421,11 +414,6 @@ public class CandidateRepository : ICandidateRepository
     }
     public async Task<string> SendMail(EmailDto payload, CredentialsObj cred)
     {
-
-        HttpClient client = new();
-
-        client.DefaultRequestHeaders.Add("x-lapo-eve-proc", cred.Token);
-
         var content = JsonSerializer.Serialize(payload);
 
         var encryptedBody = AEShandler.Encrypt(content, cred.AesKey, cred.AesIv);
@@ -434,9 +422,33 @@ public class CandidateRepository : ICandidateRepository
 
         string hexString = BitConverter.ToString(bytes).Replace("-", "").ToLower();
 
-        using MultipartFormDataContent multipartContent = new()
+        if(payload.HasFile == "Yes") {
+            var fileStream = File.OpenRead("templates/letter.pdf");
+            var options = new RestClientOptions(_config.GetValue<string>("E360:Mail_url"))
+            {
+            MaxTimeout = -1,
+            };
+            var rest = new RestClient(options);
+            var request = new RestRequest(_config.GetValue<string>("E360:Mail_url"), Method.Post);
+            request.AddHeader("x-lapo-eve-proc", cred.Token);
+            request.AlwaysMultipartFormData = true;
+            request.AddParameter("xPayload", hexString);
+
+            request.AddFile("xFile", "templates/letter.pdf");
+
+            RestResponse response = await rest.ExecuteAsync(request);
+
+            return response.Content;
+
+        } else {
+            HttpClient client = new();
+
+            client.DefaultRequestHeaders.Add("x-lapo-eve-proc", cred.Token);
+
+            using MultipartFormDataContent multipartContent = new()
         {
             { new StringContent(hexString, Encoding.UTF8, MediaTypeNames.Text.Plain), "xPayload" }
+            
         };
 
         using HttpResponseMessage response = await client.PostAsync(
@@ -446,12 +458,18 @@ public class CandidateRepository : ICandidateRepository
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
         return jsonResponse;
+        }
     }
-    public async Task<IEnumerable<MeetingDto>> GetMeetings()
+    public async Task<IEnumerable<MeetingDto>> GetMeetings(string id)
     {
+        IEnumerable<MeetingDto>? data;
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<MeetingDto>("Get_meetings", commandType: CommandType.StoredProcedure);
+        if(id == "" || id == null) {
+            data = await connection.QueryAsync<MeetingDto>("Get_meetings", commandType: CommandType.StoredProcedure);
+        } else {
+            data = await connection.QueryAsync<MeetingDto>("Get_meetings_by_application", new { Id = id }, commandType: CommandType.StoredProcedure);
+        }
 
         return data;
     }
@@ -478,7 +496,6 @@ public class CandidateRepository : ICandidateRepository
 
     public async Task<IEnumerable<CandidateModel>> GetCandidateByStage(StageDto payload)
     {
-
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         IEnumerable<CandidateModel>? data = null;
@@ -489,7 +506,6 @@ public class CandidateRepository : ICandidateRepository
             {
                 stage = payload.Stage
             };
-            // data = await connection.QueryAsync<CandidateModel>("SELECT * FROM candidates WHERE roleid = @RoleId and stage = @Stage", payload);
             data = await connection.QueryAsync<CandidateModel>("Get_applications_by_stage", body, commandType: CommandType.StoredProcedure);
         }
         else
@@ -599,8 +615,6 @@ public class CandidateRepository : ICandidateRepository
 
         var resData = await response.Content.ReadAsStringAsync();
 
-        // Console.WriteLine(resData);
-
         var jsonData = JObject.Parse(resData);
 
         if (jsonData.Value<string>("status") == "200")
@@ -654,7 +668,6 @@ public class CandidateRepository : ICandidateRepository
         var data = await connection.ExecuteAsync("Validate_email", new { Email = email }, commandType: CommandType.StoredProcedure);
 
         return data;
-
     }
     public async Task CreateComment(CommentDto payload)
     {
@@ -726,8 +739,10 @@ public class CandidateRepository : ICandidateRepository
         return data;
     }
 
-    public dynamic SendOfferMail(HireDto payload)
+    public dynamic CreateOfferMail(HireDto payload)
     {
+        var inputPath = @"templates/offer2.docx";
+        var outputPath = @"templates/letter.pdf";
 
         object[] items = {
                 new DocFields { Key = "{{position}}", Value = payload.Position},
@@ -743,15 +758,20 @@ public class CandidateRepository : ICandidateRepository
                 new DocFields { Key = "{{rank}}", Value = payload.Rank},
                 new DocFields { Key = "{{start_date}}", Value = payload.StartDate.ToString().Split(" ")[0]},
                 new DocFields { Key = "{{salwords}}", Value = payload.SalWords},
+                new DocFields { Key = "{{job_type}}", Value = payload.}
             };
 
             Document doc = new();
-            doc.LoadFromFile(@"wwwroot/templates/offer.docx");
+            doc.LoadFromFile(@"templates/offer.docx");
 
             foreach(DocFields item in items) {
                 doc.Replace(item.Key, item.Value, true, true);
             }
-            doc.SaveToFile(@"wwwroot/templates/letter.pdf", FileFormat.PDF);  
+            doc.SaveToFile(@"templates/offer2.docx", FileFormat.Docx);
+            
+            DocumentCore dc = DocumentCore.Load(inputPath);
+            dc.Save(outputPath);
+            // PdfConvert.ConvertDocxToPdf("templates/offer2.docx", outputPath);
 
         return "Successful";
     }
