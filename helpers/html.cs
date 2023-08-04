@@ -125,7 +125,7 @@ public static class HTMLHelper {
     <div style='color: black; font-size: 14px; font-weight: normal;'>
         +2348063803863 
     </div>
-    <div>
+    <div style='color: black; font-size: 11px; font-weight: normal;'>
         paul.obasuyi@lapo-nigeria.org 
         www.lapo-nigeria.org   
     </div>
@@ -205,7 +205,7 @@ public static string PasswordReset(PasswordResetFields payload) {
     <div>
         +2348063803863 
     </div>
-    <div>
+    <div style='color: black; font-size: 11px; font-weight: normal;'>
         paul.obasuyi@lapo-nigeria.org 
         www.lapo-nigeria.org   
     </div>
@@ -252,7 +252,7 @@ public static string OfferEmail(OfferMailDto payload) {
     <div>
         +2348063803863 
     </div>
-    <div>
+    <div style='color: black; font-size: 11px; font-weight: normal;'>
         paul.obasuyi@lapo-nigeria.org 
         www.lapo-nigeria.org   
     </div>
@@ -338,7 +338,7 @@ public static string VerifyEmail(BasicInfo payload) {
     <div>
         +2348063803863 
     </div>
-    <div>
+    <div style='color: black; font-size: 11px; font-weight: normal;'>
         paul.obasuyi@lapo-nigeria.org 
         www.lapo-nigeria.org   
     </div>

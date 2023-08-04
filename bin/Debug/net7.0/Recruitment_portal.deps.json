@@ -10,9 +10,11 @@
         "dependencies": {
           "BCrypt.Net-Next": "4.0.3",
           "Dapper": "2.0.123",
+          "DocXToPdfConverter": "1.0.5",
           "FluentMigrator": "3.3.2",
           "FluentMigrator.Runner": "3.3.2",
           "FreeSpire.Doc": "10.8.1",
+          "MSOffice.Interop": "16.0.55555",
           "MailKit": "3.6.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "7.0.4",
           "Microsoft.AspNetCore.Mvc.NewtonsoftJson": "7.0.3",
@@ -87,6 +89,29 @@
           "lib/net5.0/Dapper.dll": {
             "assemblyVersion": "2.0.0.0",
             "fileVersion": "2.0.123.33578"
+          }
+        }
+      },
+      "DocumentFormat.OpenXml/2.10.0-beta0002": {
+        "dependencies": {
+          "System.IO.Packaging": "4.5.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/DocumentFormat.OpenXml.dll": {
+            "assemblyVersion": "2.10.0.0",
+            "fileVersion": "2.10.0.0"
+          }
+        }
+      },
+      "DocXToPdfConverter/1.0.5": {
+        "dependencies": {
+          "DocumentFormat.OpenXml": "2.10.0-beta0002",
+          "System.Drawing.Common": "6.0.0"
+        },
+        "runtime": {
+          "lib/netcoreapp2.1/DocXToPdfConverter.dll": {
+            "assemblyVersion": "1.0.5.0",
+            "fileVersion": "1.0.5.0"
           }
         }
       },
@@ -804,6 +829,26 @@
           }
         }
       },
+      "MSOffice.Interop/16.0.55555": {
+        "runtime": {
+          "lib/Microsoft.Office.Interop.Access.Dao.dll": {
+            "assemblyVersion": "16.0.0.0",
+            "fileVersion": "16.0.11929.20048"
+          },
+          "lib/Microsoft.Office.Interop.Access.dll": {
+            "assemblyVersion": "16.0.0.0",
+            "fileVersion": "16.0.13231.20098"
+          },
+          "lib/Microsoft.Office.Interop.Excel.dll": {
+            "assemblyVersion": "16.0.0.0",
+            "fileVersion": "16.0.55555.10000"
+          },
+          "lib/Microsoft.Office.Interop.Visio.WorkflowAuthoring.dll": {
+            "assemblyVersion": "16.0.0.0",
+            "fileVersion": "16.0.55555.10000"
+          }
+        }
+      },
       "NETCore.Encrypt/2.1.1": {
         "dependencies": {
           "Newtonsoft.Json": "13.0.1"
@@ -861,7 +906,7 @@
       "sautinsoft.document/2023.4.19": {
         "dependencies": {
           "System.Drawing.Common": "6.0.0",
-          "System.IO.Packaging": "4.4.0",
+          "System.IO.Packaging": "4.5.0",
           "System.Text.Encoding.CodePages": "6.0.0",
           "System.Xml.XPath.XmlDocument": "4.3.0"
         },
@@ -1036,11 +1081,11 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "System.IO.Packaging/4.4.0": {
+      "System.IO.Packaging/4.5.0": {
         "runtime": {
-          "lib/netstandard1.3/System.IO.Packaging.dll": {
-            "assemblyVersion": "4.0.2.0",
-            "fileVersion": "4.6.25519.3"
+          "lib/netstandard2.0/System.IO.Packaging.dll": {
+            "assemblyVersion": "4.0.3.0",
+            "fileVersion": "4.6.26515.6"
           }
         }
       },
@@ -1376,6 +1421,20 @@
       "sha512": "sha512-RDFF4rBLLmbpi6pwkY7q/M6UXHRJEOerplDGE5jwEkP/JGJnBauAClYavNKJPW1yOTWRPIyfj4is3EaJxQXILQ==",
       "path": "dapper/2.0.123",
       "hashPath": "dapper.2.0.123.nupkg.sha512"
+    },
+    "DocumentFormat.OpenXml/2.10.0-beta0002": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-tu/YmcyhQ18yogwfFsYqzwUTrhBA1jyacr5oEtkOMlij8aNCo6qEdtuf4PEJtwlma6uaTj7fFYIk0nVM2xilIQ==",
+      "path": "documentformat.openxml/2.10.0-beta0002",
+      "hashPath": "documentformat.openxml.2.10.0-beta0002.nupkg.sha512"
+    },
+    "DocXToPdfConverter/1.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-V3ZVofAv0tp0DXSLyx1ouQCjFDBVj71LqI2oA9mh+yOs0vDun+rH/N1DKpPpajsvf60awL4DlCCSbbY29s1kdQ==",
+      "path": "docxtopdfconverter/1.0.5",
+      "hashPath": "docxtopdfconverter.1.0.5.nupkg.sha512"
     },
     "FluentMigrator/3.3.2": {
       "type": "package",
@@ -1839,6 +1898,13 @@
       "path": "mimekit/3.6.0",
       "hashPath": "mimekit.3.6.0.nupkg.sha512"
     },
+    "MSOffice.Interop/16.0.55555": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ctWqp4Y+Efp2YFoErVytPAtV0uqDnzLsmvbXQ4FoSj8H4b8fWkyaYtSn9heXiV+spd7laeLUYHgy/P+PTzaV2g==",
+      "path": "msoffice.interop/16.0.55555",
+      "hashPath": "msoffice.interop.16.0.55555.nupkg.sha512"
+    },
     "NETCore.Encrypt/2.1.1": {
       "type": "package",
       "serviceable": true,
@@ -2014,12 +2080,12 @@
       "path": "system.io.filesystem.primitives/4.3.0",
       "hashPath": "system.io.filesystem.primitives.4.3.0.nupkg.sha512"
     },
-    "System.IO.Packaging/4.4.0": {
+    "System.IO.Packaging/4.5.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-6Ks0U3YAW5UYGp4jxSwXCHuxHBk7ZmBfCJFhmpvn8jWIOPgXomz2Vd4PYxhaJIDchAcaYRO46Zc/TsqsYSuxhQ==",
-      "path": "system.io.packaging/4.4.0",
-      "hashPath": "system.io.packaging.4.4.0.nupkg.sha512"
+      "sha512": "sha512-OjtW5pGp1E7KE3ontBrzy+nSFJCM6pcbVDdo3gg4DauTfdtZKdeKvMVlADF4fSY+OfXWUp4qCvOSxIltt37LbA==",
+      "path": "system.io.packaging/4.5.0",
+      "hashPath": "system.io.packaging.4.5.0.nupkg.sha512"
     },
     "System.Memory/4.5.4": {
       "type": "package",

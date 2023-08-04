@@ -8,6 +8,8 @@ using Resume.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Jobrole.Repository;
 using TimedBackgroundTasks;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +56,15 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddRateLimiter(_ => _
+    .AddFixedWindowLimiter(policyName: "fixed", options =>
+    {
+        options.PermitLimit = 5;
+        options.Window = TimeSpan.FromSeconds(10);
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 2;
+    }));
+
 
 if (builder.Environment.IsDevelopment())
 {
@@ -82,6 +93,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseRateLimiter();
     app.UseCookiePolicy();
     app.UseAuthorization();
     app.UseAuthentication();
@@ -91,6 +103,7 @@ if (app.Environment.IsDevelopment())
 }
 if (app.Environment.IsProduction())
 {
+    app.UseRateLimiter();
     app.UseCookiePolicy();
     app.UseAuthorization();
     app.UseAuthentication();
@@ -98,6 +111,12 @@ if (app.Environment.IsProduction())
     app.UseSwaggerUI();
     app.MapControllers();
 }
+
+static string GetTicks() => (DateTime.Now.Ticks & 0x11111).ToString("00000");
+
+app.MapGet("/", () => Results.Ok($"Hello {GetTicks()}"))
+                           .RequireRateLimiting("fixed");
+
 app.UseCors();
 
 app.UseCookiePolicy();

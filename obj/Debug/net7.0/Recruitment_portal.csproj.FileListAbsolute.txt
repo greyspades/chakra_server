@@ -119,3 +119,9 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\runtimes\win\l
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\RestSharp.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Word.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Access.Dao.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Access.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Excel.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Visio.WorkflowAuthoring.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\DocumentFormat.OpenXml.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\DocXToPdfConverter.dll

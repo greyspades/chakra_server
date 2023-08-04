@@ -1,0 +1,10 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "task-Microsoft.Office.Interop.Word",
+      "appliesTo": "bin/Debug/net7.0/Microsoft.Office.Interop.Word.dll",
+      "type": "launch"
+    }
+  ]
+}

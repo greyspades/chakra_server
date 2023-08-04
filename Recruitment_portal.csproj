@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="DocXToPdfConverter" Version="1.0.5" />
     <PackageReference Include="FluentMigrator" Version="3.3.2" />
     <PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
     <PackageReference Include="FreeSpire.Doc" Version="10.8.1" />
@@ -20,6 +21,7 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.0" />
     <PackageReference Include="Microsoft.Graph" Version="5.10.0" />
     <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1004" />
+    <PackageReference Include="MSOffice.Interop" Version="16.0.55555" />
     <PackageReference Include="NETCore.Encrypt" Version="2.1.1" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
     <PackageReference Include="sautinsoft.document" Version="2023.4.19" />
@@ -27,5 +29,17 @@
     <PackageReference Include="Sovren.SDK" Version="1.7.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
+  <!-- <ItemGroup>
+    <COMReference Include="Microsoft.Office.Interop.Word">
+        <Guid>{00020813-0000-0000-C000-000000000046}</Guid>
+        <VersionMajor>1</VersionMajor>
+        <VersionMinor>7</VersionMinor>
+        <Lcid>0</Lcid>
+        <WrapperTool>primary</WrapperTool>
+        <Isolated>False</Isolated>
+        <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+</ItemGroup> -->
+
 
 </Project>

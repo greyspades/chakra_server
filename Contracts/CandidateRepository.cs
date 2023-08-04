@@ -18,6 +18,7 @@ using Spire.Doc;
 using RestSharp;
 using Pdf.Helper;
 using SautinSoft.Document;
+using DocXToPdfConverter;
 // using Microsoft.Office.Interop.Word;
 // using Microsoft.Office.Interop.Word;
 // using Word = Microsoft.Office.Interop.Word;
@@ -650,12 +651,12 @@ public class CandidateRepository : ICandidateRepository
         return Array.Empty<IEnumerable<dynamic>>();
     }
 
-    public async Task<IEnumerable<CandidateModel>> GetCandidateByMail(string mail)
+    public async Task<IEnumerable<BasicInfo>> GetCandidateByMail(string mail)
     {
-        Console.Write(mail);
+        // Console.Write(mail);
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CandidateModel>("Get_application_by_email", new { Email = mail }, commandType: CommandType.StoredProcedure);
+        var data = await connection.QueryAsync<BasicInfo>("Gets_user_by_email", new { Email = mail }, commandType: CommandType.StoredProcedure);
 
         return data;
     }
@@ -739,6 +740,15 @@ public class CandidateRepository : ICandidateRepository
         return data;
     }
 
+    public async Task<IEnumerable<CandidateModel>> GetApplicationsByMail(string mail) {
+
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+
+        var data = await connection.QueryAsync<CandidateModel>("Get_application_by_email", new { Email = mail }, commandType: CommandType.StoredProcedure);
+
+        return data;
+    }
+
     public dynamic CreateOfferMail(HireDto payload)
     {
         var inputPath = @"templates/offer2.docx";
@@ -758,10 +768,11 @@ public class CandidateRepository : ICandidateRepository
                 new DocFields { Key = "{{rank}}", Value = payload.Rank},
                 new DocFields { Key = "{{start_date}}", Value = payload.StartDate.ToString().Split(" ")[0]},
                 new DocFields { Key = "{{salwords}}", Value = payload.SalWords},
-                new DocFields { Key = "{{job_type}}", Value = payload.}
+                new DocFields { Key = "{{job_type}}", Value = payload.JobType}
             };
 
             Document doc = new();
+            
             doc.LoadFromFile(@"templates/offer.docx");
 
             foreach(DocFields item in items) {
@@ -769,8 +780,19 @@ public class CandidateRepository : ICandidateRepository
             }
             doc.SaveToFile(@"templates/offer2.docx", FileFormat.Docx);
             
-            DocumentCore dc = DocumentCore.Load(inputPath);
-            dc.Save(outputPath);
+            // DocumentCore dc = DocumentCore.Load(inputPath);
+            // dc.Save(outputPath);
+
+            // var librePath = "C:/Users/LAPO Mfb/Downloads/Programs/LibreOfficePortable/App/libreoffice/program/soffice.exe";
+
+            var librePath = @"C:/Users/Administrator/Downloads/LibreOfficePortable/App/libreoffice/program/soffice.exe";
+            
+            // C:\Program Files\Hosting\recruit_backend\recruit_backend\1_0_0\25-05-23\LibreOfficePortable
+
+            var test = new ReportGenerator(librePath);
+
+            test.Convert(inputPath,  outputPath);
+
             // PdfConvert.ConvertDocxToPdf("templates/offer2.docx", outputPath);
 
         return "Successful";

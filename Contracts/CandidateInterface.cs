@@ -40,7 +40,7 @@ namespace Candidate.Interface
        public Task<dynamic> CreateUser (BasicInfo payload);
        public Task<IEnumerable<BasicInfo>> GetBasicInfo(string email);
        public Task<dynamic> AdminAuth(AdminDto payload);
-       public Task<IEnumerable<CandidateModel>> GetCandidateByMail(string mail);
+       public Task<IEnumerable<BasicInfo>> GetCandidateByMail(string mail);
        public Task<int> ConfirmEmail(string email);
        public Task CreateComment(CommentDto payload);
        public Task<IEnumerable<CommentDto>> GetComments(string id);
@@ -49,5 +49,6 @@ namespace Candidate.Interface
        public Task ResetPassword(PasswordResetDto payload);
        public Task<IEnumerable<MeetingDto>> CheckMeetingStatus(string id);
        public dynamic CreateOfferMail(HireDto payload);
+       public Task<IEnumerable<CandidateModel>> GetApplicationsByMail(string mail);
     }
 }

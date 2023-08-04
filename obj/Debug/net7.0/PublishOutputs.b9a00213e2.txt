@@ -11,6 +11,8 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Azure.
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\BCrypt.Net-Next.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Cronos.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Dapper.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\DocumentFormat.OpenXml.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\DocXToPdfConverter.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\FluentMigrator.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\FluentMigrator.Abstractions.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\FluentMigrator.Extensions.Oracle.dll
@@ -62,6 +64,10 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Micros
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.SqlServer.Server.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Win32.SystemEvents.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\MimeKit.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Office.Interop.Access.Dao.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Office.Interop.Access.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Office.Interop.Excel.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Office.Interop.Visio.WorkflowAuthoring.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\NETCore.Encrypt.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Newtonsoft.Json.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Newtonsoft.Json.Bson.dll

@@ -48,6 +48,10 @@
               "target": "Package",
               "version": "[2.0.123, )"
             },
+            "DocXToPdfConverter": {
+              "target": "Package",
+              "version": "[1.0.5, )"
+            },
             "FluentMigrator": {
               "target": "Package",
               "version": "[3.3.2, )"
@@ -59,6 +63,10 @@
             "FreeSpire.Doc": {
               "target": "Package",
               "version": "[10.8.1, )"
+            },
+            "MSOffice.Interop": {
+              "target": "Package",
+              "version": "[16.0.55555, )"
             },
             "MailKit": {
               "target": "Package",
