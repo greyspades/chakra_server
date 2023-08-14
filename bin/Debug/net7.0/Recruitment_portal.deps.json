@@ -14,7 +14,6 @@
           "FluentMigrator": "3.3.2",
           "FluentMigrator.Runner": "3.3.2",
           "FreeSpire.Doc": "10.8.1",
-          "MSOffice.Interop": "16.0.55555",
           "MailKit": "3.6.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "7.0.4",
           "Microsoft.AspNetCore.Mvc.NewtonsoftJson": "7.0.3",
@@ -22,11 +21,9 @@
           "Microsoft.AspNetCore.OpenApi": "7.0.2",
           "Microsoft.Data.SqlClient": "5.1.0",
           "Microsoft.Graph": "5.10.0",
-          "Microsoft.Office.Interop.Word": "15.0.4797.1004",
           "NETCore.Encrypt": "2.1.1",
           "RestSharp": "110.2.0",
           "Sgbj.Cron.CronTimer": "1.0.2",
-          "Sovren.SDK": "1.7.1",
           "Swashbuckle.AspNetCore": "6.4.0",
           "sautinsoft.document": "2023.4.19"
         },
@@ -775,14 +772,6 @@
       },
       "Microsoft.NETCore.Platforms/1.1.0": {},
       "Microsoft.NETCore.Targets/1.1.0": {},
-      "Microsoft.Office.Interop.Word/15.0.4797.1004": {
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.Word.dll": {
-            "assemblyVersion": "15.0.0.0",
-            "fileVersion": "15.0.4797.1003"
-          }
-        }
-      },
       "Microsoft.OpenApi/1.4.3": {
         "runtime": {
           "lib/netstandard2.0/Microsoft.OpenApi.dll": {
@@ -826,26 +815,6 @@
           "lib/net6.0/MimeKit.dll": {
             "assemblyVersion": "3.6.0.0",
             "fileVersion": "3.6.0.0"
-          }
-        }
-      },
-      "MSOffice.Interop/16.0.55555": {
-        "runtime": {
-          "lib/Microsoft.Office.Interop.Access.Dao.dll": {
-            "assemblyVersion": "16.0.0.0",
-            "fileVersion": "16.0.11929.20048"
-          },
-          "lib/Microsoft.Office.Interop.Access.dll": {
-            "assemblyVersion": "16.0.0.0",
-            "fileVersion": "16.0.13231.20098"
-          },
-          "lib/Microsoft.Office.Interop.Excel.dll": {
-            "assemblyVersion": "16.0.0.0",
-            "fileVersion": "16.0.55555.10000"
-          },
-          "lib/Microsoft.Office.Interop.Visio.WorkflowAuthoring.dll": {
-            "assemblyVersion": "16.0.0.0",
-            "fileVersion": "16.0.55555.10000"
           }
         }
       },
@@ -925,18 +894,6 @@
           "lib/net6.0/CronTimer.dll": {
             "assemblyVersion": "1.0.2.0",
             "fileVersion": "1.0.2.0"
-          }
-        }
-      },
-      "Sovren.SDK/1.7.1": {
-        "dependencies": {
-          "Newtonsoft.Json": "13.0.1",
-          "System.Text.Json": "7.0.2"
-        },
-        "runtime": {
-          "lib/netstandard2.0/Sovren.SDK.dll": {
-            "assemblyVersion": "1.7.1.0",
-            "fileVersion": "1.7.1.0"
           }
         }
       },
@@ -1863,13 +1820,6 @@
       "path": "microsoft.netcore.targets/1.1.0",
       "hashPath": "microsoft.netcore.targets.1.1.0.nupkg.sha512"
     },
-    "Microsoft.Office.Interop.Word/15.0.4797.1004": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-lavTOrMGK/o/t3+gGr7JuVrL8XDdnS0DwPLcYv/StOiysXO4L0C36IXTVtEJo1Mh9Aoxo9a8dgGcPi+faTlv0g==",
-      "path": "microsoft.office.interop.word/15.0.4797.1004",
-      "hashPath": "microsoft.office.interop.word.15.0.4797.1004.nupkg.sha512"
-    },
     "Microsoft.OpenApi/1.4.3": {
       "type": "package",
       "serviceable": true,
@@ -1897,13 +1847,6 @@
       "sha512": "sha512-R7WNYvUA+qn4PHt1rMaIUJ3nyloZ2SlWyLjnLfGm90kbMcU/4sYS2QSQMs1dWbtcts5B0CSfB5a2jB9fWX9DAQ==",
       "path": "mimekit/3.6.0",
       "hashPath": "mimekit.3.6.0.nupkg.sha512"
-    },
-    "MSOffice.Interop/16.0.55555": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-ctWqp4Y+Efp2YFoErVytPAtV0uqDnzLsmvbXQ4FoSj8H4b8fWkyaYtSn9heXiV+spd7laeLUYHgy/P+PTzaV2g==",
-      "path": "msoffice.interop/16.0.55555",
-      "hashPath": "msoffice.interop.16.0.55555.nupkg.sha512"
     },
     "NETCore.Encrypt/2.1.1": {
       "type": "package",
@@ -1960,13 +1903,6 @@
       "sha512": "sha512-81gz/aOAuXkNzKrBblRjhygcCuN620Owuuqq6y4TBMS4YkbTOxljcbPOBhlTXJcZLGbI3w8JaAgYIS9v9l6J7w==",
       "path": "sgbj.cron.crontimer/1.0.2",
       "hashPath": "sgbj.cron.crontimer.1.0.2.nupkg.sha512"
-    },
-    "Sovren.SDK/1.7.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-HE6eiZvg0s9ySBy3bDJZeii0/EuECG8LI7iIohiqSLwySTg4uY4JSrCt5HQGRm2cMfihFLmlZVDRcJqzHiQ8HQ==",
-      "path": "sovren.sdk/1.7.1",
-      "hashPath": "sovren.sdk.1.7.1.nupkg.sha512"
     },
     "Swashbuckle.AspNetCore/6.4.0": {
       "type": "package",

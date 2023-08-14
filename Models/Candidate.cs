@@ -3,23 +3,34 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Candidate.Models;
 
+public class EncryptedPayload<T>
+{
+    public string EncryptedData { get; set; }
+}
+
 public class BasicInfo {
     public dynamic? Id { get; set; }
     [Required]
+    [StringLength(30)]
     public string? FirstName { get; set; }
     [Required]
+    [StringLength(30)]
     public string? LastName { get; set; }
     [Required]
     public DateTime? Dob { get; set; }
     [Required]
     [EmailAddress(ErrorMessage = "Not a valid Email format")]
     public string? Email { get; set; }
+    [Required]
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,50}$", ErrorMessage = "Not a valid Password")]
     public string? Password { get; set; }
     [Required]
     [Phone(ErrorMessage = "Not a valid phone number")]
     public string? Phone { get; set; }
+    [Required]
     public string? Address { get; set; }
     public string? MaritalStatus { get; set; }
+    [StringLength(30)]
     public string? OtherName { get; set; }
     public string? Gender { get; set; }
     public string? EmailValid { get; set; }
@@ -49,7 +60,6 @@ public class CandidateModel
     public string? Phone { get; set; }
     public string? CvPath { get; set; }
     public string? CvExtension { get; set; }
-    // public ExperienceModel[]? Expereince { get; set; }
     public string? Experience { get; set; }
     public List<string>? Skills { get; set; }
     public string? Education { get; set; }
@@ -65,6 +75,8 @@ public class CandidateModel
     public string? EmailValid { get; set; }
     public string? State { get; set; }
     public string? Lga { get; set; }
+    public string? JobType { get; set; }
+    public string? HireDate { get; set; }
 }
 
 public class CandidateData {
@@ -74,13 +86,17 @@ public class CandidateData {
 
 public class HireDto {
     public string? Id { get; set; }
+    [Required]
     public string? Location { get; set; }
+    [Required]
     public string? Position { get; set; }
     public string? Rank { get; set; }
     public DateTime? StartDate { get; set; }
     public string? ReportTo { get; set; }
     public DateTime? Date { get; set; }
+    [Required]
     public string? FirstName { get; set; }
+    [Required]
     public string? LastName { get; set; }
     public string? City { get; set; }
     public string? Salary { get; set; }
@@ -88,6 +104,7 @@ public class HireDto {
     public string? SalWords { get; set; }
     public string? JobType { get; set; }
     public bool? SendMail { get; set; }
+    public DateTime? HireDate { get; set; }
 }
 
 public class SignInDto {
@@ -207,6 +224,7 @@ public class CandidateEmailDto {
 public class PasswordResetDto {
     public string? Password { get; set; }
     public string? Email { get; set; }
+    public string? Id { get; set; }
 }
 public class PasswordResetFields {
     public string? FirstName { get; set; }

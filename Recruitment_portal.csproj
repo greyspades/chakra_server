@@ -20,13 +20,10 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.2" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.0" />
     <PackageReference Include="Microsoft.Graph" Version="5.10.0" />
-    <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1004" />
-    <PackageReference Include="MSOffice.Interop" Version="16.0.55555" />
     <PackageReference Include="NETCore.Encrypt" Version="2.1.1" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
     <PackageReference Include="sautinsoft.document" Version="2023.4.19" />
     <PackageReference Include="Sgbj.Cron.CronTimer" Version="1.0.2" />
-    <PackageReference Include="Sovren.SDK" Version="1.7.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
   <!-- <ItemGroup>

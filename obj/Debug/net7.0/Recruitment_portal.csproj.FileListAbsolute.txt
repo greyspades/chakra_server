@@ -88,7 +88,6 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.AspN
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Newtonsoft.Json.Bson.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Recruitment_portal.staticwebassets.runtime.json
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Sovren.SDK.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\NETCore.Encrypt.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Cronos.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\CronTimer.dll
@@ -118,10 +117,6 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\runtimes\win\l
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\RestSharp.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Word.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Access.Dao.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Access.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Excel.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\Microsoft.Office.Interop.Visio.WorkflowAuthoring.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\DocumentFormat.OpenXml.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\DocXToPdfConverter.dll
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\nuget.config

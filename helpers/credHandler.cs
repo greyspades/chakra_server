@@ -54,35 +54,30 @@ public class CredHandler
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
 
-            // Console.WriteLine(jsonResponse);
-
-            // using StreamWriter outputFile = new("tokenlogs.txt", true);
-
-            // await outputFile.WriteAsync(jsonResponse);
-
             var jsonObject = JObject.Parse(jsonResponse);
 
-            if(jsonObject.Value<int>("status") == 200) {
-            byte[] stringBytes = Convert.FromHexString(jsonObject.Value<string>("data"));
-
-            string bytes64 = Convert.ToBase64String(stringBytes);
-
-            var decrypted = AEShandler.Decrypt(bytes64, aesKey, aesIv);
-
-            var decryptedJson = JObject.Parse(decrypted);
-
-            var cred = new CredentialsObj
+            if (jsonObject.Value<int>("status") == 200)
             {
-                AesIv = decryptedJson.Value<string>("aesIv"),
-                AesKey = decryptedJson.Value<string>("aesKey"),
-                Token = decryptedJson.Value<string>("access_token"),
-            };
+                byte[] stringBytes = Convert.FromHexString(jsonObject.Value<string>("data"));
 
-            if (cred != null)
-            {
-                Console.WriteLine("got the credentials");
-                await connection.ExecuteAsync("Store_credentials", cred, commandType: CommandType.StoredProcedure);
-            }
+                string bytes64 = Convert.ToBase64String(stringBytes);
+
+                var decrypted = AEShandler.Decrypt(bytes64, aesKey, aesIv);
+
+                var decryptedJson = JObject.Parse(decrypted);
+
+                var cred = new CredentialsObj
+                {
+                    AesIv = decryptedJson.Value<string>("aesIv"),
+                    AesKey = decryptedJson.Value<string>("aesKey"),
+                    Token = decryptedJson.Value<string>("access_token"),
+                };
+
+                if (cred != null)
+                {
+                    Console.WriteLine("got the credentials");
+                    await connection.ExecuteAsync("Store_credentials", cred, commandType: CommandType.StoredProcedure);
+                }
             }
         }
         catch (Exception e)

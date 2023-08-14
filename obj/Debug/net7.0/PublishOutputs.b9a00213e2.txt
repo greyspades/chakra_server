@@ -1,4 +1,5 @@
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Recruitment_portal.exe
+C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\nuget.config
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\appsettings.Development.json
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\appsettings.json
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\appsettings.Production.json
@@ -59,15 +60,10 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Micros
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Kiota.Serialization.Form.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Kiota.Serialization.Json.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Kiota.Serialization.Text.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Office.Interop.Word.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.OpenApi.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.SqlServer.Server.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Win32.SystemEvents.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\MimeKit.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Office.Interop.Access.Dao.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Office.Interop.Access.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Office.Interop.Excel.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Microsoft.Office.Interop.Visio.WorkflowAuthoring.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\NETCore.Encrypt.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Newtonsoft.Json.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Newtonsoft.Json.Bson.dll
@@ -75,7 +71,6 @@ C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Bouncy
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\RestSharp.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\SautinSoft.Document.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\CronTimer.dll
-C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Sovren.SDK.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\LAPO Mfb\development\Recruitment_portal\bin\Debug\net7.0\publish\Swashbuckle.AspNetCore.SwaggerUI.dll

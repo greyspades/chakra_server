@@ -13,6 +13,9 @@ using System.Linq;
 using Newtonsoft.Json.Linq;
 using JobRole.Interface;
 using System.Text.Json;
+using InputFormat;
+using AES;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Roles.Controller;
 
@@ -32,11 +35,14 @@ public class RoleController : ControllerBase
     }
 
     // [EnableCors("Policy1")]
+    [Authorize]
     [HttpPost("all")]
-    public async Task<ActionResult> GetRoles(JobSearchDto payload)
+    public async Task<ActionResult> GetRoles(JObject jObject)
     {
         try
         {
+            var payload = jObject.ToObject<JobSearchDto>();
+
             if (payload.Value == "" && (payload.FilterType == ""))
             {
                 var data = await _repo.GetRoles();
@@ -45,15 +51,19 @@ public class RoleController : ControllerBase
 
                 var slicedList = data.Skip((int)count).Take(10);
 
+                // Console.WriteLine(slicedList.First());
+
                 // var searchResult = searchList.FindAll((item) => item.Name.ToLower().Contains(payload.Value.ToLower()));
 
                 var response = new
                 {
                     code = 200,
                     message = "Successful",
-                    data = slicedList,
+                    data = AEShandler.EncryptResponse(slicedList),
+                    // data = slicedList,
                     count = data.Count()
                 };
+                // AEShandler.Decrypt(encryptedPayload, "yy7a1^.^^j_ii^c2^5^ho_@.9^d7bi^." , "h!!_2bz^(@?yyq!.");
 
                 return Ok(response);
             } else if(payload.FilterType == "Qualification") {
@@ -67,7 +77,7 @@ public class RoleController : ControllerBase
                 {
                     code = 200,
                     message = "Successful",
-                    data = searchResult
+                    data = AEShandler.EncryptResponse(searchResult)
                 };
 
                 return Ok(response);
@@ -82,7 +92,7 @@ public class RoleController : ControllerBase
                 {
                     code = 200,
                     message = "Successful",
-                    data = searchResult
+                    data = AEShandler.EncryptResponse(searchResult)
                 };
 
                 return Ok(response);
@@ -98,7 +108,7 @@ public class RoleController : ControllerBase
                 {
                     code = 200,
                     message = "Successful",
-                    data = searchResult
+                    data = AEShandler.EncryptResponse(searchResult)
                 };
 
                 return Ok(response);
@@ -114,7 +124,7 @@ public class RoleController : ControllerBase
                 {
                     code = 200,
                     message = "Successful",
-                    data = searchResult
+                    data = AEShandler.EncryptResponse(searchResult)
                 };
 
                 return Ok(response);
@@ -131,7 +141,7 @@ public class RoleController : ControllerBase
                 {
                     code = 200,
                     message = "Successful",
-                    data = searchResult
+                    data = AEShandler.EncryptResponse(searchResult)
                 };
 
                 return Ok(response);
@@ -142,7 +152,7 @@ public class RoleController : ControllerBase
                 {
                     code = 200,
                     message = "Successful",
-                    data
+                    data = AEShandler.EncryptResponse(data)
                 };
 
                 return Ok(response);
@@ -156,20 +166,22 @@ public class RoleController : ControllerBase
 
             await outputFile.WriteAsync(e.Message);
 
-            var result = new {
-                code = 500,
-                message = "Unnable to process your request"
-            };
+            // var result = new {
+            //     code = 500,
+            //     message = "Unnable to process your request"
+            // };
 
-            return StatusCode(500, result);
+            return StatusCode(500, e.Message);
         }
     }
-
+    [Authorize]
     [HttpPost]
-    public async Task<ActionResult> AddRole(JobRoleModel payload)
+    public async Task<ActionResult> AddRole(JObject jObject)
     {
         try
         {
+            var payload = jObject.ToObject<JobRoleModel>();
+
             using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
             var duplicate = await _repo.GetJobByCode(payload.Code);
@@ -214,19 +226,21 @@ public class RoleController : ControllerBase
             return StatusCode(500, result);
         }
     }
-
+    [Authorize]
     [HttpPost("byId")]
-    public async Task<ActionResult<JobRoleModel>> GetRoleById(JobRoleDto payload)
+    public async Task<ActionResult<JobRoleModel>> GetRoleById(JObject jObject)
     {
         try
         {
+            var payload = jObject.ToObject<JobRoleDto>();
+            
             var data = await _repo.GetJobRoleById(payload.Id);
 
             var response = new
             {
                 code = 200,
                 message = "Successful",
-                data
+                data = AEShandler.EncryptResponse(data)
             };
 
             return Ok(response);
@@ -238,13 +252,15 @@ public class RoleController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-
+    [Authorize]
     [HttpGet("byUnit/{unit}")]
-    public async Task<ActionResult<JobRoleModel>> GetRoleByDivision(string unit)
+    public async Task<ActionResult<JobRoleModel>> GetRoleByDivision(JObject jObject)
     {
         try
         {
-            var data = await _repo.GetJobRoleByUnit(unit);
+             var payload = jObject.ToObject<string>();
+
+            var data = await _repo.GetJobRoleByUnit(payload);
 
             return Ok(data);
         }
@@ -255,12 +271,14 @@ public class RoleController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-
+    [Authorize]
     [HttpPost("getJobRoles")]
-    public async Task<ActionResult<string>> GetJobRoles(PaginationDto payload)
+    public async Task<ActionResult<string>> GetJobRoles(JObject jObject)
     {
         try
         {
+            var payload = jObject.ToObject<PaginationDto>();
+            
             var data = await _repo.GetJobRoles();
 
             var count = payload.Page * 10;
@@ -272,7 +290,7 @@ public class RoleController : ControllerBase
                 code = 200,
                 message = "Successful",
                 count = data.Count(),
-                data = slicedCandidates
+                data = AEShandler.EncryptResponse(slicedCandidates)
             };
 
             return Ok(response);
@@ -283,15 +301,17 @@ public class RoleController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-
+    [Authorize]
     [HttpPost("JobByCode")]
-    public async Task<ActionResult> GetJobByCode(JobRoleDto payload)
+    public async Task<ActionResult> GetJobByCode(JObject jObject)
     {
         try
         {
+            var payload = jObject.ToObject<JobRoleDto>();
+
             var data = await _repo.GetJobByCode(payload.Code);
 
-            return Ok(data);
+            return Ok(AEShandler.EncryptResponse(data));
         }
         catch (Exception e)
         {
@@ -307,12 +327,14 @@ public class RoleController : ControllerBase
         }
     }
 
-
+    [Authorize]
     [HttpPost("getJobDescription")]
-    public async Task<ActionResult> GetJobDescription(JobRoleDto payload)
+    public async Task<ActionResult> GetJobDescription(JObject jObject)
     {
         try
         {
+            var payload = jObject.ToObject<JobRoleDto>();
+
             var data = await _repo.GetJobDescription(payload.Code);
             if (data.Any())
             {
@@ -320,7 +342,7 @@ public class RoleController : ControllerBase
                 {
                     code = 200,
                     message = "Successful",
-                    data
+                    data = AEShandler.EncryptResponse(data)
                 };
 
                 return Ok(response);
@@ -349,19 +371,21 @@ public class RoleController : ControllerBase
             return StatusCode(500, response);
         }
     }
-
+    [Authorize]
     [HttpPost("search")]
-    public async Task<ActionResult> SearchJob(JobRoleDto payload)
+    public async Task<ActionResult> SearchJob(JObject jObject)
     {
         try
         {
+            var payload = jObject.ToObject<JobRoleDto>();
 
             var data = await _repo.GetJobRoles();
+
             List<Job> dataList = (List<Job>)data;
 
             var result = dataList.FindAll((item) => item.Item.ToLower().Contains(payload.Value.ToLower()));
 
-            return Ok(result);
+            return Ok(AEShandler.EncryptResponse(result));
         }
         catch (Exception e)
         {
@@ -376,9 +400,14 @@ public class RoleController : ControllerBase
             return StatusCode(500, response);
         }
     }
+
+    [Authorize]
     [HttpPost("status")]
-    public async Task<ActionResult> ChangeJobStatus(Job payload) {
+    public async Task<ActionResult> ChangeJobStatus(JObject jObject) {
         try {
+            
+            var payload = jObject.ToObject<Job>();
+
             await _repo.ChangeJobStatus(payload);
 
             var response = new {

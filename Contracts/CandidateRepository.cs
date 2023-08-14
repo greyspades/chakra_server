@@ -16,16 +16,11 @@ using Microsoft.Graph.Models;
 using Candidate.Interface;
 using Spire.Doc;
 using RestSharp;
-using Pdf.Helper;
 using SautinSoft.Document;
 using DocXToPdfConverter;
-// using Microsoft.Office.Interop.Word;
-// using Microsoft.Office.Interop.Word;
-// using Word = Microsoft.Office.Interop.Word;
-// using AsposePdf = global::Aspose.Pdf;
-// using Aspose.Pdf.Text;
-// using System.Reflection.Metadata;
-// using Aspose.Pdf;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+
 
 namespace Candidate.Repository;
 public class CandidateRepository : ICandidateRepository
@@ -148,7 +143,7 @@ public class CandidateRepository : ICandidateRepository
 
         await connection.ExecuteAsync("Update_last_temp_id", new { TempId = tempId }, commandType: CommandType.StoredProcedure);
 
-        await connection.ExecuteAsync("Hire_candidate", new { Id = payload.Id }, commandType: CommandType.StoredProcedure);
+        await connection.ExecuteAsync("Hire_candidate", new { Id = payload.Id, HireDate = payload.HireDate }, commandType: CommandType.StoredProcedure);
 
         return $"TSN{tempId}";
     }
@@ -214,7 +209,7 @@ public class CandidateRepository : ICandidateRepository
         string guid = id.ToString();
 
         var extension = Path.GetExtension(formFile.FileName);
-        var path = $"cv/{guid}.{extension}";
+        var path = @$"cv/{guid}.{extension}";
         var fileData = new
         {
             extension,
@@ -478,7 +473,7 @@ public class CandidateRepository : ICandidateRepository
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        await connection.ExecuteAsync("Reset_password", payload, commandType: CommandType.StoredProcedure);
+        await connection.ExecuteAsync("Reset_password", new { payload.Id, payload.Password}, commandType: CommandType.StoredProcedure);
     }
     public async Task<IEnumerable<MeetingDto>> GetMeeting(MeetingDto payload)
     {
@@ -547,17 +542,14 @@ public class CandidateRepository : ICandidateRepository
 
     public async Task<dynamic> CreateUser(BasicInfo payload)
     {
-
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         var data = await connection.ExecuteAsync("Create_new_user", payload, commandType: CommandType.StoredProcedure);
 
         return data;
     }
-
     public async Task<IEnumerable<BasicInfo>> GetBasicInfo(string email)
     {
-
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
         var data = await connection.QueryAsync<BasicInfo>("Gets_user_by_email", new { Email = email }, commandType: CommandType.StoredProcedure);
@@ -779,21 +771,51 @@ public class CandidateRepository : ICandidateRepository
                 doc.Replace(item.Key, item.Value, true, true);
             }
             doc.SaveToFile(@"templates/offer2.docx", FileFormat.Docx);
-            
-            // DocumentCore dc = DocumentCore.Load(inputPath);
-            // dc.Save(outputPath);
 
-            // var librePath = "C:/Users/LAPO Mfb/Downloads/Programs/LibreOfficePortable/App/libreoffice/program/soffice.exe";
-
-            var librePath = @"C:/Users/Administrator/Downloads/LibreOfficePortable/App/libreoffice/program/soffice.exe";
-            
-            // C:\Program Files\Hosting\recruit_backend\recruit_backend\1_0_0\25-05-23\LibreOfficePortable
+            var librePath = @"LibreOfficePortable/App/libreoffice/program/soffice.exe";
+        
 
             var test = new ReportGenerator(librePath);
 
             test.Convert(inputPath,  outputPath);
 
-            // PdfConvert.ConvertDocxToPdf("templates/offer2.docx", outputPath);
+            // PdfConvert.ConvertDocxToPdf("wwwroot/templates/offer2.docx", outputPath);
+
+
+        //     string outputFormat = "pdf";
+
+        // string libreOfficeCommand = $"\"C:\\Program Files\\LibreOffice\\program\\soffice.exe\" --convert-to {outputFormat} --outdir \"{outputPath}\" \"{inputPath}\"";
+
+        // ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", $"/c {libreOfficeCommand}");
+        // startInfo.RedirectStandardOutput = true;
+        // startInfo.RedirectStandardError = true;
+        // System.Diagnostics.Process process = new System.Diagnostics.Process();
+        // process.StartInfo = startInfo;
+        // process.Start();
+
+        // string output = process.StandardOutput.ReadToEnd();
+        // string error = process.StandardError.ReadToEnd();
+
+        // process.WaitForExit();
+
+        // string htmlContent = HTMLHelper.OfferLetter(payload);
+
+        // var serviceProvider = new ServiceCollection()
+        //     .AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()))
+        //     .AddScoped<PdfConversionService>()
+        //     .BuildServiceProvider();
+
+        // using (var scope = serviceProvider.CreateScope())
+        // {
+        //     var pdfConversionService = scope.ServiceProvider.GetRequiredService<PdfConversionService>();
+        //     byte[] pdfBytes = pdfConversionService.ConvertHtmlToPdf(htmlContent);
+
+        //     // Save or process the PDF bytes as needed
+        //     File.WriteAllBytes(outputPath, pdfBytes);
+        // }
+
+// // Save the PDF to a file
+// File.WriteAllBytes("output.pdf", pdfBytes);
 
         return "Successful";
     }

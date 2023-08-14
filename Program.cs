@@ -10,11 +10,16 @@ using Jobrole.Repository;
 using TimedBackgroundTasks;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
+using EncryptMiddleware;
+using InputFormat;
+using AuthHandler;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers(
+    (options) => options.InputFormatters.Insert(0, new XInputFormatter())
+    );
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Logging.ClearProviders();
@@ -24,35 +29,32 @@ builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
 
-// builder.Services.Configure<ResumeDbSettings>(
-//     builder.Configuration.GetSection("ResumeDatabase"));
 
 var Configuration = builder.Configuration;
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+builder.Services.AddAuthentication(options =>
     {
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
-        options.SlidingExpiration = true;
-        options.Cookie.Name = "cookieAuth";
-        options.Cookie.SameSite = SameSiteMode.None; //TODO is this important?
-        options.Cookie.HttpOnly = false;
-        options.SlidingExpiration = true;
-        options.LoginPath = "/api/Candidate/signin";
-        options.LogoutPath = "/api/User/logout";
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    });
+        options.DefaultAuthenticateScheme = CustomAuthenticationOptions.AuthenticationScheme;
+        options.DefaultChallengeScheme = CustomAuthenticationOptions.AuthenticationScheme;
+    })
+    .AddCustomAuthentication();
+
+builder.Services.AddHsts(options =>
+            {
+                options.MaxAge = TimeSpan.FromDays(365); // Set the max-age value (1 year in this example)
+                options.IncludeSubDomains = true; // Include subdomains
+            });
+
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(
-        policy =>
+     options.AddPolicy("ReactPolicy", builder =>
         {
-            policy
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-            .SetIsOriginAllowed(hostName => true);
+            builder
+                //    .WithOrigins("https://10.0.1.46:8443", "http://localhost:3000")
+                   .AllowAnyOrigin()
+                   .WithMethods("GET", "POST")
+                   .WithHeaders("Content-Type","Access-Control-Allow-Origin", "Auth");
         });
 });
 
@@ -65,66 +67,43 @@ builder.Services.AddRateLimiter(_ => _
         options.QueueLimit = 2;
     }));
 
-
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        policy =>
-        {
-            policy
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-            .SetIsOriginAllowed(hostName => true);
-        });
-});
-}
-var cookiePolicyOptions = new CookiePolicyOptions
-{
-    MinimumSameSitePolicy = SameSiteMode.Lax,
-    // HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
-    Secure = CookieSecurePolicy.None,
-};
-
 var app = builder.Build();
+
+app.UseCors("ReactPolicy");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseRateLimiter();
-    app.UseCookiePolicy();
-    app.UseAuthorization();
-    app.UseAuthentication();
+        app.UseAuthentication();
+     app.UseAuthorization();
+    // app.UseRateLimiter();
+    // app.UseCookiePolicy();
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapControllers();
 }
 if (app.Environment.IsProduction())
-{
-    app.UseRateLimiter();
-    app.UseCookiePolicy();
-    app.UseAuthorization();
+{ 
+    app.UseHsts();
     app.UseAuthentication();
+    app.UseAuthorization();
+    // app.UseRateLimiter();
+    // app.UseCookiePolicy();
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapControllers();
 }
 
-static string GetTicks() => (DateTime.Now.Ticks & 0x11111).ToString("00000");
+// static string GetTicks() => (DateTime.Now.Ticks & 0x11111).ToString("00000");
 
-app.MapGet("/", () => Results.Ok($"Hello {GetTicks()}"))
-                           .RequireRateLimiting("fixed");
+// app.MapGet("/", () => Results.Ok($"Hello {GetTicks()}"))
+//                            .RequireRateLimiting("fixed");
 
-app.UseCors();
-
-app.UseCookiePolicy();
-
-app.UseAuthorization();
+// app.UseCookiePolicy();
 
 app.UseAuthentication();
 
+app.UseAuthorization();
 
 app.UseStaticFiles(new StaticFileOptions()
 {
@@ -133,13 +112,12 @@ app.UseStaticFiles(new StaticFileOptions()
     {
         ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
     },
-
 });
 
-app.MapDefaultControllerRoute();
+// app.MapDefaultControllerRoute();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
-app.MapControllers();
+// app.MapControllers();
 
 app.Run();

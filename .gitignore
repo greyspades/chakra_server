@@ -1,0 +1,14 @@
+# Ignore specific files
+secret.txt
+debug.log
+tokenlogs.txt
+
+# Ignore a folder and its contents
+# /temp/
+/templates/
+/cv/
+/LibreOfficePortable/
+/out/
+
+# Ignore all .log files
+*.log
