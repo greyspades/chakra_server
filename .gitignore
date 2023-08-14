@@ -9,6 +9,7 @@ tokenlogs.txt
 /cv/
 /LibreOfficePortable/
 /out/
+/bin/
 
 # Ignore all .log files
 *.log
