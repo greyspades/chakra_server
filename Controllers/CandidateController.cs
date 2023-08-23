@@ -115,7 +115,7 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [Authorize]
+    // [Authorize]
     [HttpPost("create")]
     public async Task<ActionResult> CreateCandidate([FromForm] CandidateModel payload)
     {
