@@ -40,7 +40,7 @@ public class TimedHostedService : BackgroundService
     {
         var cred = new CredHandler(_config);
 
-        await cred.Renew();
+        // await cred.Renew();
         
         // using StreamWriter outputFile = new("tokenlogs.txt", true);
 

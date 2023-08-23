@@ -38,6 +38,12 @@ public class BasicInfo {
     public string? Lga { get; set; }
 }
 
+public class CreateCandidateDto {
+    public IFormFile Cv { get; set; }
+    public CandidateModel Data { get; set; }
+
+}
+
 public class CandidateModel
 {
     public dynamic? Id { get; set; }
@@ -77,6 +83,11 @@ public class CandidateModel
     public string? Lga { get; set; }
     public string? JobType { get; set; }
     public string? HireDate { get; set; }
+
+    public static explicit operator string(CandidateModel v)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class CandidateData {
@@ -203,6 +214,8 @@ public class GetCandidatesDto {
     public string? Id { get; set; }
     public int? Page { get; set; }
     public int? Take { get; set; }
+    public string? Filter { get; set; }
+    public string? FilterValue { get; set; }
 }
 
 public class CandidateDto {

@@ -30,6 +30,7 @@ public class CandidateRepository : ICandidateRepository
     {
         this._config = config;
     }
+    //* gets all candidates
     public async Task<IEnumerable<CandidateModel>> GetCandidates()
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -38,6 +39,8 @@ public class CandidateRepository : ICandidateRepository
 
         return data;
     }
+
+    //* gets candidates by a specific uuid
     public async Task<IEnumerable<CandidateModel>> GetCandidateById(string Id)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -53,6 +56,7 @@ public class CandidateRepository : ICandidateRepository
 
     //     return data;
     // }
+    //* creates a new candidate
     public async Task<string> CreateCandidate(CandidateModel payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -92,14 +96,16 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
-    public async Task<string> UpdateData(UpdateEmail payload)
-    {
-        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.ExecuteAsync("Get_jobs", payload, commandType: CommandType.StoredProcedure);
+    // public async Task<string> UpdateData(UpdateEmail payload)
+    // {
+    //     using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        return "Successful";
-    }
+    //     var data = await connection.ExecuteAsync("Get_jobs", payload, commandType: CommandType.StoredProcedure);
+
+    //     return "Successful";
+    // }
+    //* gets candidates by a specific role
     public async Task<IEnumerable<CandidateModel>> GetCandidatesByRole(string Id)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -107,6 +113,7 @@ public class CandidateRepository : ICandidateRepository
         IEnumerable<CandidateModel>? data = await connection.QueryAsync<CandidateModel>("Get_jobs", new { Id }, commandType: CommandType.StoredProcedure);
         return data;
     }
+    //* gets a specific candidates skills
     public async Task<IEnumerable<string>> GetSkills(string id)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -114,6 +121,8 @@ public class CandidateRepository : ICandidateRepository
 
         return data;
     }
+
+    //* gets a candidate by some specific skills
     public async Task<IEnumerable<string>> GetCandidateBySkills(SkillsInput payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -121,6 +130,8 @@ public class CandidateRepository : ICandidateRepository
 
         return data;
     }
+
+    //* updates a candidate application stage
     public async Task<string> UpdateStage(UpdateRole payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -129,6 +140,8 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
+
+    //* hires a candidate
     public async Task<string> HireCandidate(HireDto payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -138,15 +151,20 @@ public class CandidateRepository : ICandidateRepository
         var summation = int.Parse(currentId.FirstOrDefault()!) + 1;
 
         var tempId = summation.ToString().PadLeft(5, '0');
-
+        
+        //* assigns a temporary staff id to the candidate
         await connection.ExecuteAsync("Set_temp_id", new { Id = payload.Id, TempId = tempId }, commandType: CommandType.StoredProcedure);
 
+        //* updates the last temporary staff if
         await connection.ExecuteAsync("Update_last_temp_id", new { TempId = tempId }, commandType: CommandType.StoredProcedure);
 
+        //* flags the candidate as hired
         await connection.ExecuteAsync("Hire_candidate", new { Id = payload.Id, HireDate = payload.HireDate }, commandType: CommandType.StoredProcedure);
 
         return $"TSN{tempId}";
     }
+
+    //* confirms the email address exists and is verified
     public async Task<IEnumerable<BasicInfo>> CheckEmail(string email)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -155,14 +173,17 @@ public class CandidateRepository : ICandidateRepository
 
         return data;
     }
+    //* gets the last user credentials
     public async Task<CredentialsObj> GetCredentials()
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        var data = await connection.QueryAsync<CredentialsObj>("Get_cred", commandType: CommandType.StoredProcedure);
+        var data = await connection.QueryAsync<CredentialsObj>("Get_credentials", commandType: CommandType.StoredProcedure);
 
         return data.First();
     }
+
+    //* cancells an application
     public async Task<string> CancelApplication(string id)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -171,6 +192,8 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
+
+    //* flags a candidate
     public async Task<string> FlagCandidate(FlagCandidateDto payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -179,6 +202,7 @@ public class CandidateRepository : ICandidateRepository
 
         return "Successful";
     }
+    //* gets the application status of a candidate
     public async Task<IEnumerable<CandidateModel>> GetStatus(GetStatusDto payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -187,6 +211,8 @@ public class CandidateRepository : ICandidateRepository
 
         return data;
     }
+
+    //* gets a candidate by a flag
     public async Task<IEnumerable<CandidateModel>> GetByFlag(CandidateByFlagDto payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -194,16 +220,15 @@ public class CandidateRepository : ICandidateRepository
         IEnumerable<CandidateModel> data;
 
         if(payload.RoleId != "") {
-            Console.WriteLine("its by role");
             data = await connection.QueryAsync<CandidateModel>("Get_application_by_flag", payload, commandType: CommandType.StoredProcedure);
         } else {
-            Console.WriteLine("all applications");
             data = await connection.QueryAsync<CandidateModel>("Get_all_applications_by_flag", new { payload.Flag }, commandType: CommandType.StoredProcedure);
         }
 
         return data;
     }
 
+    //* parces and saves the candidates cv to the folder storage
     public async Task<dynamic> ParseCvAsync(IFormFile formFile, Guid id)
     {
         string guid = id.ToString();
@@ -228,6 +253,8 @@ public class CandidateRepository : ICandidateRepository
 
         return fileData;
     }
+
+    //* checks a candidates application
     public async Task<IEnumerable<CandidateModel>> CheckCandidate(CandidateModel payload)
     {
         using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -237,6 +264,7 @@ public class CandidateRepository : ICandidateRepository
         return data;
     }
 
+    //* gets the bytes from an uploaded cv
     public async Task<byte[]> GetBytes(IFormFile formFile)
     {
         await using var memoryStream = new MemoryStream();
@@ -299,6 +327,7 @@ public class CandidateRepository : ICandidateRepository
     //         return e.Message;
     //     }
     // }
+    //* generates a meeting token to be used to create a zoom meeting
     public async Task<string> CreateMeetingToken()
     {
         HttpClient client = new();

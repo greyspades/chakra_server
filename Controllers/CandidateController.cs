@@ -117,25 +117,18 @@ public class CandidateController : ControllerBase
 
     [Authorize]
     [HttpPost("create")]
-    public async Task<ActionResult<List<CandidateModel>>> CreateCandidate([FromForm] CandidateModel payload)
+    public async Task<ActionResult> CreateCandidate([FromForm] CandidateModel payload)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                // Console.WriteLine("it begins");
-                
-                // var payload = jObject.ToObject<CandidateModel>();
+                // var payload = jObject.Data;
+                // Console.WriteLine(payload.FirstName);
 
-                // Console.WriteLine(payload.CoverLetter);
-                
                 var dateDifference = (DateTime.Now.Date - payload?.Dob.Value)?.TotalDays;
 
                 var info = await _repo.GetBasicInfo(payload?.Email);
-
-                // Console.WriteLine(info.First().LastName);
-
-                // Console.WriteLine(payload.Cv);
 
                 var applications = await _repo.GetApplicationsByMail(payload.Email);
 
@@ -502,13 +495,13 @@ public class CandidateController : ControllerBase
                     return Ok(response);
                 }
 
-                    //  var response = new
-                    // {
-                    //     code = 401,
-                    //     message = "Candidate has already been hired",
-                    // };
+                //  var response = new
+                // {
+                //     code = 401,
+                //     message = "Candidate has already been hired",
+                // };
 
-                    // return Ok(response);
+                // return Ok(response);
                 // }
             }
             catch (Exception e)
@@ -657,22 +650,36 @@ public class CandidateController : ControllerBase
                 {
                     data = await _repo.GetCandidates();
                 }
-
-                var result = new
-                {
-                    code = 200,
-                    message = "you "
-                };
-
                 var count = payload.Page * 10;
 
-                var slicedCandidates = data.Skip((int)count!).Take((int)payload.Take!);
+                IEnumerable<CandidateModel> filteredData;
+
+                if (payload.Filter == "status")
+                {
+                    filteredData = data.Where((CandidateModel item) => item.Status == payload.FilterValue);
+                }
+                else if (payload.Filter == "stage")
+                {
+                    filteredData = data.Where((CandidateModel item) => item.Stage == payload.FilterValue);
+                }
+                else if (payload.Filter == "date")
+                {
+                    DateTime startDate = DateTime.Parse(payload.FilterValue.Split(":")[0]);
+                    DateTime endDate = DateTime.Parse(payload.FilterValue.Split(":")[1]);
+                    filteredData = data.Where((CandidateModel item) => item.ApplDate >= startDate && item.ApplDate <= endDate);
+                }
+                else
+                {
+                    filteredData = data;
+                }
+
+                var slicedCandidates = filteredData.Skip((int)count!).Take((int)payload.Take!);
 
                 var response = new
                 {
                     code = 200,
                     data = AEShandler.EncryptResponse(slicedCandidates),
-                    count = data.Count()
+                    count = filteredData.Count()
                 };
 
                 return Ok(response);
@@ -893,7 +900,7 @@ public class CandidateController : ControllerBase
                 if (user.Any())
                 {
                     payload.Password = BC.HashPassword(payload.Password);
-                    
+
                     payload.Id = user.First().Id;
 
                     await _repo.ResetPassword(payload);
@@ -944,7 +951,7 @@ public class CandidateController : ControllerBase
             // var id = jObject.ToObject<string>();
 
             dynamic path = @$"cv/{id}..pdf";
-            
+
             var extension = Path.GetExtension(path);
             var content = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             return File(content, "application/octet-stream");
@@ -1350,7 +1357,8 @@ public class CandidateController : ControllerBase
                 var data = await _repo.AdminAuth(payload);
 
                 // Console.WriteLine(data);
-                var response = new {
+                var response = new
+                {
                     code = 200,
                     data = AEShandler.EncryptResponse(data)
                 };
@@ -1373,7 +1381,7 @@ public class CandidateController : ControllerBase
 
     [Authorize]
     [HttpPost("validate")]
-    public async Task<ActionResult> ValidateEmail(CandidateEmailDto payload)
+    public async Task<ActionResult> ValidateEmail(JObject jObject)
     {
         if (!ModelState.IsValid)
         {
@@ -1383,6 +1391,7 @@ public class CandidateController : ControllerBase
         {
             try
             {
+                 var payload = jObject.ToObject<CandidateEmailDto>();
 
                 byte[] stringBytes = Convert.FromHexString(payload.Email);
 
@@ -1468,7 +1477,7 @@ public class CandidateController : ControllerBase
 
     [Authorize]
     [HttpPost("comment")]
-    public async Task<ActionResult> Comment(CommentDto payload)
+    public async Task<ActionResult> Comment(JObject jObject)
     {
         if (!ModelState.IsValid)
         {
@@ -1478,6 +1487,8 @@ public class CandidateController : ControllerBase
         {
             try
             {
+                 var payload = jObject.ToObject<CommentDto>();
+
                 payload.Date = DateTime.Now;
 
                 await _repo.CreateComment(payload);

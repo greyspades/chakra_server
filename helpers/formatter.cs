@@ -31,6 +31,17 @@ public class XInputFormatter: InputFormatter
             // Console.WriteLine(request.ContentType);
 
             if(actionName == "CreateCandidate") {
+                var encryptedPayload = await reader.ReadToEndAsync();
+
+                var payload = JsonConvert.DeserializeObject<CreateCandidateDto>(encryptedPayload);
+
+                var decryptedPayload = AEShandler.Decrypt((string)payload.Data, "yy7a1^.^^j_ii^c2^5^ho_@.9^d7bi^." , "h!!_2bz^(@?yyq!.");
+
+                var deserializedData = JsonConvert.DeserializeObject<CandidateModel>(decryptedPayload);
+
+                payload.Data = deserializedData;
+
+                // return await InputFormatterResult.SuccessAsync(payload);
                 return await InputFormatterResult.NoValueAsync();
             }
             else {

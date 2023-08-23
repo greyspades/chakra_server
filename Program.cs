@@ -13,8 +13,12 @@ using Microsoft.AspNetCore.RateLimiting;
 using EncryptMiddleware;
 using InputFormat;
 using AuthHandler;
+using Middleware.NoSniff;
+using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var Configuration = builder.Configuration;
 
 // Add services to the container
 builder.Services.AddControllers(
@@ -29,9 +33,13 @@ builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
 
+// builder.Services.AddMemoryCache();
+//     builder.Services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
+//     builder.Services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
 
-var Configuration = builder.Configuration;
+//     builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
+//* configures authentication
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = CustomAuthenticationOptions.AuthenticationScheme;
@@ -39,45 +47,61 @@ builder.Services.AddAuthentication(options =>
     })
     .AddCustomAuthentication();
 
-builder.Services.AddHsts(options =>
-            {
-                options.MaxAge = TimeSpan.FromDays(365); // Set the max-age value (1 year in this example)
-                options.IncludeSubDomains = true; // Include subdomains
-            });
+//* hsts configuration
+// builder.Services.AddHsts(options =>
+//             {
+//                 options.MaxAge = TimeSpan.FromDays(365); // Set the max-age value (1 year in this example)
+//                 options.IncludeSubDomains = true; // Include subdomains
+//             });
 
 
+//* configures the cors setup
 builder.Services.AddCors(options =>
 {
      options.AddPolicy("ReactPolicy", builder =>
         {
             builder
-                //    .WithOrigins("https://10.0.1.46:8443", "http://localhost:3000")
-                   .AllowAnyOrigin()
+                   .WithOrigins(Configuration.GetValue<string>("Production:Url"))
+                //    .AllowAnyOrigin()
                    .WithMethods("GET", "POST")
                    .WithHeaders("Content-Type","Access-Control-Allow-Origin", "Auth");
         });
 });
 
-builder.Services.AddRateLimiter(_ => _
-    .AddFixedWindowLimiter(policyName: "fixed", options =>
+//* configures the ratelimiter
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
     {
-        options.PermitLimit = 5;
-        options.Window = TimeSpan.FromSeconds(10);
-        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        options.QueueLimit = 2;
-    }));
+        return RateLimitPartition.GetFixedWindowLimiter(partitionKey: httpContext.Request.Headers.Host.ToString(), partition =>
+            new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                AutoReplenishment = true,
+                QueueLimit = 5,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                Window = TimeSpan.FromSeconds(10)
+            });
+    });
+    //* custom response if there are too many requests
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later... ", cancellationToken: token);
+    };
+});
 
+// Configure the HTTP request pipeline.
 var app = builder.Build();
+
+app.UseMiddleware<NoSniffMiddleware>();
 
 app.UseCors("ReactPolicy");
 
-// Configure the HTTP request pipeline.
+app.UseRateLimiter();
+
 if (app.Environment.IsDevelopment())
 {
-        app.UseAuthentication();
-     app.UseAuthorization();
-    // app.UseRateLimiter();
-    // app.UseCookiePolicy();
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapControllers();
@@ -85,26 +109,19 @@ if (app.Environment.IsDevelopment())
 if (app.Environment.IsProduction())
 { 
     app.UseHsts();
-    app.UseAuthentication();
-    app.UseAuthorization();
-    // app.UseRateLimiter();
-    // app.UseCookiePolicy();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.MapControllers();
 }
 
-// static string GetTicks() => (DateTime.Now.Ticks & 0x11111).ToString("00000");
+app.UseSwagger();
 
-// app.MapGet("/", () => Results.Ok($"Hello {GetTicks()}"))
-//                            .RequireRateLimiting("fixed");
+app.UseSwaggerUI();
 
-// app.UseCookiePolicy();
+app.MapControllers();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
+//* static file sharing
 app.UseStaticFiles(new StaticFileOptions()
 {
     ServeUnknownFileTypes = true,

@@ -50,8 +50,9 @@ public class RoleController : ControllerBase
                 var count = payload.Page * 10;
 
                 var slicedList = data.Skip((int)count).Take(10);
-
-                // Console.WriteLine(slicedList.First());
+                
+                // string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                // Console.WriteLine(ipAddress);
 
                 // var searchResult = searchList.FindAll((item) => item.Name.ToLower().Contains(payload.Value.ToLower()));
 
