@@ -76,9 +76,9 @@ builder.Services.AddRateLimiter(options =>
         return RateLimitPartition.GetFixedWindowLimiter(partitionKey: httpContext.Request.Headers.Host.ToString(), partition =>
             new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 5,
+                PermitLimit = 50,
                 AutoReplenishment = true,
-                QueueLimit = 5,
+                QueueLimit = 50,
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 Window = TimeSpan.FromSeconds(10)
             });

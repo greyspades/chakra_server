@@ -115,7 +115,7 @@ public class CandidateController : ControllerBase
         }
     }
 
-    [Authorize]
+    // [Authorize]
     [HttpPost("create")]
     public async Task<ActionResult> CreateCandidate([FromForm] CandidateModel payload)
     {
@@ -123,8 +123,12 @@ public class CandidateController : ControllerBase
         {
             try
             {
-                // var payload = jObject.Data;
+                // var payload = jObject.ToObject<CandidateModel>();
+                // var payload = request.CanData;
                 // Console.WriteLine(payload.FirstName);
+                // IFormFile file = Request.Form.Files[0];
+
+                // payload.Cv = file;
 
                 var dateDifference = (DateTime.Now.Date - payload?.Dob.Value)?.TotalDays;
 
@@ -160,7 +164,15 @@ public class CandidateController : ControllerBase
                     var uuid = guid;
                     if (payload.Cv != null)
                     {
+                        // Console.WriteLine("has cv");
                         var fileData = await _repo.ParseCvAsync(payload.Cv, uuid);
+                    }
+                    else {
+                        var res = new {
+                            code = 400,
+                            message = "no resume"
+                        };
+                        return Ok(res);
                     }
                     payload.Id = uuid.ToString();
                     payload.ApplDate = DateTime.Now;
@@ -1354,16 +1366,32 @@ public class CandidateController : ControllerBase
             {
                 var payload = jObject.ToObject<AdminDto>();
 
-                var data = await _repo.AdminAuth(payload);
 
-                // Console.WriteLine(data);
-                var response = new
-                {
-                    code = 200,
-                    data = AEShandler.EncryptResponse(data)
-                };
+                var admins = _config.GetSection("E360:Admin").Get<List<string>>();
 
-                return Ok(response);
+                if(admins.Contains(payload.Id.ToUpper())) {
+
+                    var data = await _repo.AdminAuth(payload);
+
+                    var response = new
+                    {
+                        code = data.code,
+                        data = AEShandler.EncryptResponse(data),
+                        message = data.message
+                    };
+
+                    return Ok(response);
+                } else {
+                    var response = new
+                    {
+                        code = 400,
+                        message = "You are not authorized to use this service"
+                    };
+
+                    return Ok(response);
+                }
+
+    
             }
             catch (Exception e)
             {

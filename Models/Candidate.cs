@@ -7,6 +7,10 @@ public class EncryptedPayload<T>
 {
     public string EncryptedData { get; set; }
 }
+public class CreateCandidate {
+    public CandidateModel? CanData { get; set; }
+    public IFormFile? Cv { get; set; }
+}
 
 public class BasicInfo {
     public dynamic? Id { get; set; }

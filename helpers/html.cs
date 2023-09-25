@@ -188,7 +188,7 @@ public static string PasswordReset(PasswordResetFields payload) {
             Dear {payload.FirstName}
         </p>
         <div style='color: black; font-size: 14px; font-weight: normal;'>
-            To reset your password please click <a href='http://192.168.1.28:8089/password_reset?email={payload.Email}&token=00727143910'>here</a>
+            To reset your password please click <a href='https://career.lapo-nigeria.org/password_reset?email={payload.Email}&token=00727143910'>here</a>
         </div>
     </div>
 </body>
@@ -299,7 +299,7 @@ public static string Acceptance(CandidateModel payload) {
     </div>
     <div style='color: black; font-size: 11px; font-weight: normal;'>
         paul.obasuyi@lapo-nigeria.org 
-        www.lapo-nigeria.org   
+        www.lapo-nigeria.org
     </div>
 </footer>
 </html>";
@@ -315,7 +315,7 @@ public static string VerifyEmail(BasicInfo payload) {
     </div>
     <div>
         <p style='color: black; font-size: 14px; font-weight: normal;'>
-            Please Confirm your email address by clicking <a href='http://localhost:8089/emailConfirmation?email={payload.Email}'>here</a>
+            Please Confirm your email address by clicking <a href='https://career.lapo-nigeria.org/emailConfirmation?email={payload.Email}'>here</a>
         </p>
     </div>
     <div style='color: black; font-size: 14px; font-weight: normal;'>

@@ -28,18 +28,23 @@ public class XInputFormatter: InputFormatter
             
             var actionName = httpContext.Request.RouteValues["action"] as string;
 
+            // Console.WriteLine(actionName);
+            // Console.WriteLine(controllerName);
+
             // Console.WriteLine(request.ContentType);
 
             if(actionName == "CreateCandidate") {
-                var encryptedPayload = await reader.ReadToEndAsync();
+                // var encryptedPayload = await reader.ReadToEndAsync();
 
-                var payload = JsonConvert.DeserializeObject<CreateCandidateDto>(encryptedPayload);
+                // var payload = JsonConvert.DeserializeObject<CreateCandidate>(encryptedPayload);
 
-                var decryptedPayload = AEShandler.Decrypt((string)payload.Data, "yy7a1^.^^j_ii^c2^5^ho_@.9^d7bi^." , "h!!_2bz^(@?yyq!.");
+                // var decryptedPayload = AEShandler.Decrypt((string)payload.CanData, "yy7a1^.^^j_ii^c2^5^ho_@.9^d7bi^." , "h!!_2bz^(@?yyq!.");
 
-                var deserializedData = JsonConvert.DeserializeObject<CandidateModel>(decryptedPayload);
+                // var deserializedData = JsonConvert.DeserializeObject<CandidateModel>(decryptedPayload);
 
-                payload.Data = deserializedData;
+                // Console.WriteLine(deserializedData.FirstName);
+
+                // payload.CanData = deserializedData;
 
                 // return await InputFormatterResult.SuccessAsync(payload);
                 return await InputFormatterResult.NoValueAsync();

@@ -660,7 +660,7 @@ public class CandidateRepository : ICandidateRepository
         }
         else if (jsonData.Value<string>("status") != "200")
         {
-            Console.WriteLine("something went wrong");
+            // Console.WriteLine("something went wrong");
             var res = new
             {
                 code = 400,
