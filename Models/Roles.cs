@@ -16,6 +16,7 @@ public class JobRoleModel
     public string? Code { get; set; }
     public string? Location { get; set; }
     public string? Skills { get; set; }
+    public string? Knowledges { get; set; }
     public string? Qualification { get; set; }
     public string? JobType { get; set; }
 }

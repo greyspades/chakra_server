@@ -20,5 +20,6 @@ namespace JobRole.Interface
        public Task<JobRoleModel> GetJobRoleById(string id);
        public Task<JobRoleModel> GetJobRoleByUnit(string unit);
        public Task ChangeJobStatus(Job payload);
+       public Task EditJobRole(JobRoleModel payload);
     }
 }

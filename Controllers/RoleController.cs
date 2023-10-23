@@ -16,6 +16,7 @@ using System.Text.Json;
 using InputFormat;
 using AES;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Graph.Models;
 
 namespace Roles.Controller;
 
@@ -303,6 +304,34 @@ public class RoleController : ControllerBase
         }
     }
     [Authorize]
+    [HttpPost("update")]
+    public async Task<ActionResult> UpdateJobRole(JObject jObject) {
+        try {
+            var payload = jObject.ToObject<JobRoleModel>();
+
+            await _repo.EditJobRole(payload);
+
+            var response = new {
+                code = 200,
+                Message = "Updated job role successfully"
+            };
+
+            return Ok(response);
+        } catch(Exception e) {
+            Console.WriteLine(e.Message);
+
+            var response = new
+            {
+                code = 500,
+                message = "Unnable to process your request"
+            };
+
+            return StatusCode(500, response);
+        }
+    }
+
+
+    [Authorize]
     [HttpPost("JobByCode")]
     public async Task<ActionResult> GetJobByCode(JObject jObject)
     {
@@ -312,7 +341,13 @@ public class RoleController : ControllerBase
 
             var data = await _repo.GetJobByCode(payload.Code);
 
-            return Ok(AEShandler.EncryptResponse(data));
+            var response = new {
+                code = 200,
+                message = "Successfull",
+                data = AEShandler.EncryptResponse(data)
+            };
+
+            return Ok(response);
         }
         catch (Exception e)
         {
@@ -386,7 +421,19 @@ public class RoleController : ControllerBase
 
             var result = dataList.FindAll((item) => item.Item.ToLower().Contains(payload.Value.ToLower()));
 
-            return Ok(AEShandler.EncryptResponse(result));
+            // foreach(Job job in result) {
+            //     AEShandler.EncryptResponse(job);
+            //     Console.WriteLine(AEShandler.EncryptResponse(job));
+            // }
+            // Console.WriteLine(result.First().Item);
+
+            // return Ok(AEShandler.EncryptResponse(result));
+            var response = new {
+                code = 200,
+                message = "Successfull",
+                data = AEShandler.EncryptResponse(result)
+            };
+            return Ok(response);
         }
         catch (Exception e)
         {

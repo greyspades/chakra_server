@@ -18,6 +18,7 @@ using Meetings.Models;
 using Roles.Models;
 using JobRole.Interface;
 using System.Text.Json;
+using Microsoft.Graph.Models;
 // using Newtonsoft.Json;
 
 namespace Jobrole.Repository;
@@ -206,6 +207,12 @@ public class JobRoleRepository: IJobRoleRepository
         var data = await connection.QueryAsync("Get_jobrole_by_id", new { Id = id }, commandType: CommandType.StoredProcedure);
 
         return data.First();
+    }
+
+      public async Task EditJobRole(JobRoleModel payload)
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        await connection.ExecuteAsync("Edit_job_role", new { Id = payload.Id, Name=payload.Name, Description=payload.Description, Experience=payload.Experience, Deadline=payload.Deadline, Qualification=payload.Qualification, Skills=payload.Skills, Location=payload.Location, JobType=payload.JobType, Knowledges=payload.Knowledges }, commandType: CommandType.StoredProcedure);
     }
 
     public async Task<JobRoleModel> GetJobRoleByUnit(string unit)
